@@ -1,0 +1,25 @@
+[package]
+name = "aelhometta"
+version = "1.0.0"
+authors = ["Ælhometta project <aelhometta@proton.me>", "serhon <serhon@protonmail.com>"]
+description = "Archaic attempt at autonomous non-sandboxed distributed artificial life of assembler automaton type."
+homepage = "https://github.com/aelhometta/aelhometta"
+keywords = ["artificial", "assembler", "distributed", "input-output", "life"]
+categories = ["science"]
+license = "GPL-3.0-or-later"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[profile.release]
+incremental = true
+
+[dependencies]
+chrono = "0.4.31"
+crossterm = "0.27.0"
+emyzelium = "0.9.8"
+enum-primitive-derive = "0.3.0"
+num-traits = "0.2.17"
+rand = "0.8.5"
+serde = { version = "1.0.193", features = ["derive"] }
+serde_json = "1.0.108"
