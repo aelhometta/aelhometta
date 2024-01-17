@@ -81,6 +81,16 @@ Assuming you have [installed Rust toolchain](https://www.rust-lang.org/tools/ins
 $ cargo build --release
 ```
 
+<details>
+<summary><b>Missing dependencies?</b></summary>
+
+On Linux, try this:
+
+```shell
+$ sudo apt install libzmq3-dev
+```
+</details>
+
 Since the state is saved in a file whose size is typically hundreds of MB, consider making a symbolic link to the executable (`target/release/aelhometta`), or placing that executable, at another location, perhaps a ramdisk, and running it from there:
 
 ```shell
@@ -206,7 +216,7 @@ Here's how to do it quickly:
 ---
 
 <details>
-<summary>Obtain key pair in Python</summary>
+<summary><b>Obtain key pair in Python</b></summary>
 
 ```shell
 $ pip3 install -U pyzmq
