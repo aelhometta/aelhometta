@@ -5,7 +5,7 @@ authors = ["Ælhometta project <aelhometta@proton.me>", "serhon <serhon@protonma
 description = "Archaic attempt at autonomous non-sandboxed distributed artificial life of assembler automaton type."
 homepage = "https://github.com/aelhometta/aelhometta"
 keywords = ["artificial", "assembler", "distributed", "input-output", "life"]
-categories = ["science"]
+categories = ["science" ]
 license = "GPL-3.0-or-later"
 edition = "2021"
 
