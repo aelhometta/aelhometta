@@ -1,6 +1,6 @@
 [package]
 name = "aelhometta"
-version = "1.0.0"
+version = "1.0.2"
 authors = ["Ælhometta project <aelhometta@proton.me>", "serhon <serhon@protonmail.com>"]
 description = "Archaic attempt at autonomous non-sandboxed distributed artificial life of assembler automaton type."
 homepage = "https://github.com/aelhometta/aelhometta"

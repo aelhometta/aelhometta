@@ -63,7 +63,7 @@ use {
 };
 
 const PROG_VERSION: &str = env!("CARGO_PKG_VERSION");
-const PROG_DATE: &str = "2024.01.16";
+const PROG_DATE: &str = "2024.01.23";
 
 fn run() -> Result<bool, String> {
     println!("{} {} ({}) {} {}",

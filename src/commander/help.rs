@@ -192,8 +192,8 @@ impl Commander {
                 println!("{:32}{}{}", "", "topic".dark_grey().italic(), " : one of the following (case-insensitive):".dark_grey());
                 println!("{:39}{}{}", "", "cgen".dark_grey().italic(), " — generation of controllers".dark_grey());
                 println!("{:39}{}{}", "", "chan".dark_grey().italic(), " — channels usage (optuid, integer)".dark_grey());
-                println!("{:39}{}{}", "", "comm".dark_grey().italic(), " — commands (execution count)".dark_grey());
                 println!("{:39}{}{}", "", "cont".dark_grey().italic(), " — content of nodes".dark_grey());
+                println!("{:39}{}{}", "", "tick".dark_grey().italic(), " — execution count (spaces, branches, commands), construction instructions count".dark_grey());
             },
 
             "cleanse" => {

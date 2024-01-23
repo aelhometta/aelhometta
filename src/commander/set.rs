@@ -48,9 +48,10 @@ impl Commander {
                             println!("{}", "Set".green());
                             Ok(())
                         },
-                        Err(err) => err.prefixised("bool value")
+                        Err(err) => err.prefixised("bool")
                     }
                 },
+
                 "show_ticks" => {
                     match value.parse::<bool>() {
                         Ok(b) => {
@@ -58,9 +59,84 @@ impl Commander {
                             println!("{}", "Set".green());
                             Ok(())
                         },
-                        Err(err) => err.prefixised("bool value")
+                        Err(err) => err.prefixised("bool")
                     }
                 },
+
+                "sequence_def_limit" => {
+                    match value.parse::<usize>() {
+                        Ok(l) => {
+                            if l > 0 {
+                                self.settings.sequence_def_limit = l;
+                                println!("{}", "Set".green());
+                                Ok(())
+                            } else {
+                                Err(String::from("Limit must be greater than 0"))
+                            }
+                        },
+                        Err(err) => err.prefixised("limit")
+                    }
+                },
+
+                "show_freqs" => {
+                    match value.parse::<bool>() {
+                        Ok(b) => {
+                            self.settings.show_freqs = b;
+                            println!("{}", "Set".green());
+                            Ok(())
+                        },
+                        Err(err) => err.prefixised("bool")
+                    }
+                },
+
+                "freqs_interval" => {
+                    match value.parse::<usize>() {
+                        Ok(t) => {
+                            if t > 0 {
+                                self.settings.freqs_interval = t;
+                                println!("{}", "Set".green());
+                                Ok(())
+                            } else {
+                                Err(String::from("Interval must be greater than 0"))
+                            }
+                        },
+                        Err(err) => err.prefixised("interval")
+                    }
+                },
+
+                "freqs_window_margin" => {
+                    match value.parse::<usize>() {
+                        Ok(m) => {
+                            self.settings.freqs_window_margin = m;
+                            println!("{}", "Set".green());
+                            Ok(())
+                        },
+                        Err(err) => err.prefixised("margin")
+                    }
+                },
+
+                "freqs_comm_str_len" => {
+                    match value.parse::<usize>() {
+                        Ok(l) => {
+                            self.settings.freqs_comm_str_len = l;
+                            println!("{}", "Set".green());
+                            Ok(())
+                        },
+                        Err(err) => err.prefixised("length")
+                    }
+                },
+
+                "freqs_cons_str_len" => {
+                    match value.parse::<usize>() {
+                        Ok(l) => {
+                            self.settings.freqs_cons_str_len = l;
+                            println!("{}", "Set".green());
+                            Ok(())
+                        },
+                        Err(err) => err.prefixised("length")
+                    }
+                },
+
                 _ => {
                     Err(String::from("Unknown setting"))
                 }

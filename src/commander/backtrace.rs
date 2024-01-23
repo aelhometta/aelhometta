@@ -47,7 +47,6 @@ use {
         Uid
     },
     super::{
-        DEFAULT_SEQUENCE_LIMIT,
         Commander,
         ParseErrorPrefixise,
         ParseHex
@@ -73,7 +72,7 @@ impl Commander {
                             }
                         }
                     } else {
-                        (uid, DEFAULT_SEQUENCE_LIMIT)
+                        (uid, self.settings.sequence_def_limit)
                     }
                 },
                 Err(err) => {
@@ -91,7 +90,7 @@ impl Commander {
                 let mut nuids_set: HashSet<Uid> = HashSet::new();
                 let mut n: usize = 0;
 
-                // How it ends, besides "no previous node"?
+                // How it ends, beside "no previous node"?
                 let mut end_loop = false;
                 let mut end_limit = false;
                 let mut end_empty = false;

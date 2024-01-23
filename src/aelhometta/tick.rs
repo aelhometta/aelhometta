@@ -147,6 +147,12 @@ impl Ælhometta {
                                                                             self.glitch_construct_count += 1;
                                                                         }
 
+                                                                        if let Content::Construction(construction) = rcontent {
+                                                                            self.constructions_count.entry(construction)
+                                                                            .and_modify(|n| { *n += 1 })
+                                                                            .or_insert(1);
+                                                                        }
+
                                                                         let wcontent = Content::ot_bits(self.nodes.get(&wnuid).unwrap().b_content);
                                                                         match rcontent {
                                                                             Content::Space | Content::Branch | Content::Command(_) => {
@@ -764,7 +770,19 @@ impl Ælhometta {
                                     .or_insert(1);
                             },
 
-                            Content::Space | Content::Branch | Content::Construction(_) => {}
+                            Content::Space => {
+                                self.spaces_count += 1;
+                            },
+                            
+                            Content::Branch => {
+                                if ctrl.flags.success {
+                                    self.branches_main_count += 1;
+                                } else {
+                                    self.branches_alt_count += 1;
+                                }
+                            },
+                            
+                            Content::Construction(_) => {}
                         };
 
                         // update exec pointkey

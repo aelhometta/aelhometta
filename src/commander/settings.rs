@@ -34,11 +34,35 @@ use super::Commander;
 
 impl Commander {
     fn print_show_ticks(&self) {
-        println!("{}{}", format!("{:16}", "show_ticks").dark_yellow(), format!("{}", self.settings.show_ticks).dark_yellow().bold());
+        println!("{}{}", format!("{:24}", "show_ticks").dark_yellow(), format!("{}", self.settings.show_ticks).dark_yellow().bold());
     }
 
     fn print_show_abs_time(&self) {
-        println!("{}{}", format!("{:16}", "show_abs_time").dark_yellow(), format!("{}", self.settings.show_abs_time).dark_yellow().bold());
+        println!("{}{}", format!("{:24}", "show_abs_time").dark_yellow(), format!("{}", self.settings.show_abs_time).dark_yellow().bold());
+    }
+
+    fn print_sequence_def_limit(&self) {
+        println!("{}{}", format!("{:24}", "sequence_def_limit").dark_blue(), format!("{}", self.settings.sequence_def_limit).blue());
+    }
+
+    fn print_show_freqs(&self) {
+        println!("{}{}", format!("{:24}", "show_freqs").dark_yellow(), format!("{}", self.settings.show_freqs).dark_yellow().bold());
+    }
+
+    fn print_freqs_interval(&self) {
+        println!("{}{}", format!("{:24}", "freqs_interval").dark_green(), format!("{}", self.settings.freqs_interval).green());
+    }
+
+    fn print_freqs_window_margin(&self) {
+        println!("{}{}", format!("{:24}", "freqs_window_margin").dark_blue(), format!("{}", self.settings.freqs_window_margin).blue());
+    }
+
+    fn print_freqs_comm_str_len(&self) {
+        println!("{}{}", format!("{:24}", "freqs_comm_str_len").dark_blue(), format!("{}", self.settings.freqs_comm_str_len).blue());
+    }
+
+    fn print_freqs_cons_str_len(&self) {
+        println!("{}{}", format!("{:24}", "freqs_cons_str_len").dark_blue(), format!("{}", self.settings.freqs_cons_str_len).blue());
     }
 
     pub fn settings(&self, setting: &str) -> Result<(), String> {
@@ -46,6 +70,12 @@ impl Commander {
             "" => {
                 self.print_show_abs_time();
                 self.print_show_ticks();
+                self.print_sequence_def_limit();
+                self.print_show_freqs();
+                self.print_freqs_interval();
+                self.print_freqs_window_margin();
+                self.print_freqs_comm_str_len();
+                self.print_freqs_cons_str_len();
                 Ok(())
             },
             "show_abs_time" => {
@@ -54,6 +84,30 @@ impl Commander {
             }
             "show_ticks" => {
                 self.print_show_ticks();
+                Ok(())
+            },
+            "sequence_def_limit" => {
+                self.print_sequence_def_limit();
+                Ok(())
+            },
+            "show_freqs" => {
+                self.print_show_freqs();
+                Ok(())
+            },
+            "freqs_interval" => {
+                self.print_freqs_interval();
+                Ok(())
+            },
+            "freqs_window_margin" => {
+                self.print_freqs_window_margin();
+                Ok(())
+            },
+            "freqs_comm_str_len" => {
+                self.print_freqs_comm_str_len();
+                Ok(())
+            },
+            "freqs_cons_str_len" => {
+                self.print_freqs_cons_str_len();
                 Ok(())
             },
             _ => {

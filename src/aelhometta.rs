@@ -91,7 +91,7 @@ pub type Optuid = Option<Uid>;
 
 pub type Integer = i64;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Primitive)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Primitive, PartialOrd, Ord)]
 pub enum Command {
     Abs                         = 1,
     Add                         = 2,
@@ -110,8 +110,8 @@ pub enum Command {
     IntegerChannelToInteger     = 15,
     IntegerIndexToInteger       = 16,
     IntegerToDataOptuidIndex    = 17,
-    IntegerToIntegerIndex       = 18,
-    IntegerToIntegerChannel     = 19,
+    IntegerToIntegerChannel     = 18,
+    IntegerToIntegerIndex       = 19,
     IntegerToOptuidChannel      = 20,
     IntegerToOptuidIndex        = 21,
     IntegerToPeer               = 22,
@@ -153,8 +153,8 @@ pub enum Command {
     SetIntegersFromInteger      = 58,
     SetOptuidFromDataOptuid     = 59,
     SetOptuidFromExec           = 60,
-    ShiftUp                     = 61,
-    ShiftDown                   = 62,
+    ShiftDown                   = 61,
+    ShiftUp                     = 62,
     Sign                        = 63,
     Skip                        = 64,
     Square                      = 65,
@@ -170,7 +170,7 @@ pub enum Command {
     ZeroInteger                 = 75
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Primitive)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Primitive, PartialOrd, Ord)]
 pub enum Construction {
     AltNext         = 0,
     Discard         = 1,
@@ -364,7 +364,12 @@ pub struct Ælhometta {
     ether_integers: Vec<Integer>,
 
     age: u128, // ticks performed
+
+    spaces_count: u128,
+    branches_main_count: u128,
+    branches_alt_count: u128,
     commands_count: HashMap<Command, u128>,
+    constructions_count: HashMap<Construction, u128>, // "special": updated from within execution of Construct command
 
     glitch_background_prob: f64, // probability per tick of random node changing its content randomly
     glitch_background_count: u128,
@@ -411,6 +416,32 @@ pub struct TickData {
 
 pub trait Hexly {
     fn hexly(&self) -> String;
+}
+
+fn new_commands_count() -> HashMap<Command, u128> {
+    let mut commands_count = HashMap::new();
+    for content in CONTENTS {
+        match content {
+            Content::Command(command) => {
+                commands_count.insert(command, 0);
+            },
+            _ => {}
+        }
+    }
+    commands_count
+}
+
+pub fn new_constructions_count() -> HashMap<Construction, u128> {
+    let mut constructions_count = HashMap::new();
+    for content in CONTENTS {
+        match content {
+            Content::Construction(construction) => {
+                constructions_count.insert(construction, 0);
+            },
+            _ => {}
+        }
+    }
+    constructions_count
 }
 
 impl ToBits<u8> for Content {
@@ -775,31 +806,9 @@ impl Ælhometta {
         snouid
     }
 
-    fn reset_commands_count(&mut self) {
-        self.commands_count.clear();
-        for content in CONTENTS {
-            match content {
-                Content::Command(command) => {
-                    self.commands_count.insert(command, 0);
-                },
-                _ => {}
-            }
-        }
-    }
-
     pub fn new(max_num_chains_binlog: u8) -> Self {
         let rng = thread_rng();
         let max_num_chains: usize = 1 << max_num_chains_binlog;
-
-        let mut commands_count = HashMap::<Command, u128>::new();
-        for content in CONTENTS {
-            match content {
-                Content::Command(command) => {
-                    commands_count.insert(command, 0);
-                },
-                _ => {}
-            }
-        }
 
         Self {
             max_num_chains_binlog,
@@ -817,7 +826,11 @@ impl Ælhometta {
             ether_optuids: vec![None; NUM_OPTUID_CHANNELS],
             ether_integers: vec![0; NUM_INTEGER_CHANNELS],
             age: 0,
-            commands_count,
+            spaces_count: 0,
+            branches_main_count: 0,
+            branches_alt_count: 0,
+            commands_count: new_commands_count(),
+            constructions_count: new_constructions_count(),
             glitch_background_prob: 0.0,
             glitch_background_count: 0,
             glitch_replicate_prob: 0.0,
@@ -852,6 +865,26 @@ impl Ælhometta {
         self.age
     }
 
+    pub fn spaces_count(&self) -> u128 {
+        self.spaces_count
+    }
+
+    pub fn branches_main_count(&self) -> u128 {
+        self.branches_main_count
+    }
+
+    pub fn branches_alt_count(&self) -> u128 {
+        self.branches_alt_count
+    }
+
+    pub fn commands_count(&self) -> & HashMap<Command, u128> {
+        & self.commands_count
+    }
+
+    pub fn constructions_count(&self) -> & HashMap<Construction, u128> {
+        & self.constructions_count
+    }
+
     pub fn max_num_chains_binlog(&self) -> u8 {
         self.max_num_chains_binlog
     }
@@ -871,19 +904,21 @@ impl Ælhometta {
     pub fn mem_usage(&self) -> usize {
         use std::mem::size_of;
         self.nodes.capacity() * (size_of::<Node>() + size_of::<Uid>())
-            + self.nodes_historing.capacity() * size_of::<Optuid>()
-            + self.controllers.capacity() * (size_of::<Controller>() + size_of::<Uid>())
-            + self.controllers_historing.capacity() * size_of::<Optuid>()
-            + NUM_OPTUID_CHANNELS * size_of::<Optuid>()
-            + NUM_INTEGER_CHANNELS * size_of::<Integer>()
+        + self.nodes_historing.capacity() * size_of::<Optuid>()
+        + self.controllers.capacity() * (size_of::<Controller>() + size_of::<Uid>())
+        + self.controllers_historing.capacity() * size_of::<Optuid>()
+        + NUM_OPTUID_CHANNELS * size_of::<Optuid>()
+        + NUM_INTEGER_CHANNELS * size_of::<Integer>()
 
-            + self.controllers.iter().map(|(_, ctrl)| {
-                if ctrl.new_controller.is_some() { size_of::<Controller>() } else { 0 }
-            }).sum::<usize>()
+        + self.controllers.iter().map(|(_, ctrl)| {
+            if ctrl.new_controller.is_some() { size_of::<Controller>() } else { 0 }
+        }).sum::<usize>()
 
-            + self.other_peers.iter().map(|peer|
-                peer.ether_integers.len() * size_of::<Integer>()
-            ).sum::<usize>()
+        + self.other_peers.iter().map(|peer|
+            peer.ether_integers.len() * size_of::<Integer>()
+        ).sum::<usize>()
+
+        + (self.output_mappings.capacity() + self.input_mappings.capacity()) * size_of::<IntegersFileMapping>()
     }
 
     pub fn random_node_optuid(&mut self) -> Optuid {
@@ -933,10 +968,6 @@ impl Ælhometta {
 
     pub fn ether_integers(&self) -> & Vec<Integer> {
         & self.ether_integers
-    }
-
-    pub fn commands_count(&self) -> & HashMap<Command, u128> {
-        & self.commands_count
     }
 
     pub fn glitch_background_prob(&self) -> f64 {
@@ -1040,7 +1071,12 @@ impl Ælhometta {
         self.ether_integers = vec![0; NUM_INTEGER_CHANNELS];
 
         self.age = 0;
-        self.reset_commands_count();
+        
+        self.spaces_count = 0;
+        self.branches_main_count = 0;
+        self.branches_alt_count = 0;
+        self.commands_count = new_commands_count();
+        self.constructions_count = new_constructions_count();
 
         self.glitch_background_prob = 0.0;
         self.glitch_background_count = 0;

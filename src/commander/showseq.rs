@@ -45,7 +45,6 @@ use {
         serbin::OtBits
     },
     super::{
-        DEFAULT_SEQUENCE_LIMIT,
         Commander,
         ParseErrorPrefixise,
         ParseHex
@@ -71,7 +70,7 @@ impl Commander {
                             }
                         }
                     } else {
-                        (uid, DEFAULT_SEQUENCE_LIMIT)
+                        (uid, self.settings.sequence_def_limit)
                     }
                 },
                 Err(err) => {

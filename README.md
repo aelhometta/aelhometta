@@ -2,13 +2,15 @@
 
 Archaic attempt at autonomous non-sandboxed distributed artificial life of assembler automaton type, it features: separation of descriptive and executive data that provides branches and loops without jump instructions, encrypted publish-subscribe interaction with other instances over Tor, input/output through ordinary files associated with external sensors and actuators, and built-in shell.
 
-Of course it is akin to AlChemy<sup>[[FON1]](#refFON1), [[FON2]](#refFON2)</sup> / Avida<sup>[[ADA1]](#refADA1), [[OFR1]](#refOFR1)</sup> / Coreworld<sup>[[RAS1]](#refRAS1)</sup> / Stringmol<sup>[[HIC1]](#refHIC1)</sup> / (Network) Tierra<sup>[[RAY1]](#refRAY1), [[RAY3]](#refRAY3)</sup> / ... / biolife, and it, as a project and a concept, may collapse or branch sooner rather than later due to participation of few devices *you* have certain control over, which are periodically online and which are optionally connected, on the one hand, to microphones, cameras, thermometers, receivers, ~~dosimeters~~ etc. (inputs) and, on the other hand, to speakers, monitors, conditioners, transmitters, ~~control rods~~ and so on (outputs). However, an instance can run completely isolated in memory of an offline device with no access to outside world, or switch between offline and online modes.
+Of course it is akin to AlChemy<sup>[[FON1]](#refFON1), [[FON2]](#refFON2)</sup> / Avida<sup>[[ADA1]](#refADA1), [[OFR1]](#refOFR1)</sup> / Coreworld<sup>[[RAS1]](#refRAS1)</sup> / Stringmol<sup>[[HIC1]](#refHIC1)</sup> / (Network) Tierra<sup>[[RAY1]](#refRAY1), [[RAY3]](#refRAY3)</sup> / ... / biolife and it, as a project and a concept, may collapse or branch sooner rather than later due to participation of few devices *you* have certain control over, which are periodically online and which are optionally connected, on the one hand, to microphones, cameras, thermometers, receivers, ~~dosimeters~~ etc. (inputs) and, on the other hand, to speakers, monitors, conditioners, transmitters, ~~control rods~~ and so on (outputs). However, an instance can run completely isolated in memory of an offline device with no access to outside world, or switch between offline and online modes.
 
 ![demo scast gif](https://raw.githubusercontent.com/aelhometta/visuals/main/aelhometta_demo.gif)
 
+![freqs scast gif](https://raw.githubusercontent.com/aelhometta/visuals/main/aelhometta_freqs.gif)
+
 By now you probably know the big shining elusive goals of such enterprises better than us, — open-endedness, Cambrian explosion, blah-blah-blah, — the problem is, what if they are incompatible with safety? What if necessary (though in no way sufficient) condition is to allow the interaction of the artificial environment at hand with the real world beyond sandboxing threshold? Are we, shaped by evolution in this world, able to recognise open-endedness if it has not been moulded by the forces of the same world, when some of them do not have even names? If it kills, it will be killed... or rather less adapted variations will be, but more adapted ones will survive.
 
-If so, then we ought to choose: open-endedness XOR safety. On the other hand, our precious safety may follow from... experience, simply: decades of such researches, volumes of such reflections, but — without exceptions, since we are still here... yet — in the end, a fizzle. As noted two decades ago,
+If so, then we ought to choose: open-endedness XOR safety. On the other hand, our precious safety may follow from... experience, simply: decades of researches, volumes of reflections, but — without exceptions, since we are still here... yet — in the end, a fizzle. As noted twenty years ago,
 
 > *&ldquo;All of this was impressive work, and it pointed the way forward to a consolidation of what these imaginative individuals had done. But the consolidation never happened. At each conference I went to, the larger group of people involved all seemed to want to do things from scratch, in their own way. Each had his or her own way of setting up the issues. There was not nearly enough work that* built on *the promising beginnings of Ray and others. The field never made a transition into anything resembling normal science. And it has now ground to a halt.&rdquo;*<sup>[[GOD1]](#refGOD1)</sup>
 
@@ -73,6 +75,8 @@ Bye-bye brittleness? Hello rigidness! Also, less Euclidicity of a "space" ælhom
 
 * State is automatically saved at exit and loaded at start.
 
+* Cross-platform, works even in text mode.
+
 ## Quickstart
 
 Assuming you have [installed Rust toolchain](https://www.rust-lang.org/tools/install), download the source, e.g. to `~/aelhometta`, and from there
@@ -80,6 +84,16 @@ Assuming you have [installed Rust toolchain](https://www.rust-lang.org/tools/ins
 ```shell
 $ cargo build --release
 ```
+
+<details>
+<summary><b>Missing dependencies?</b></summary>
+
+On Linux (Debian-based), try this:
+
+```shell
+$ sudo apt install libzmq3-dev
+```
+</details>
 
 Since the state is saved in a file whose size is typically hundreds of MB, consider making a symbolic link to the executable (`target/release/aelhometta`), or placing that executable, at another location, perhaps a ramdisk, and running it from there:
 
@@ -129,7 +143,9 @@ Type in the following commands:
 
 but with aliases). That is, we introduce an *ancestor* — of type `B`, with *spacity* 5 — and let the environment *tick* on its own. At each tick, a controller is chosen randomly from the set of all controllers, processes the content of the node it currently "looks" at, and moves to the next node.
 
-Wait for half a minute or so, then press any key to stop ticking. There should be many more *nodes* and *controllers*, like this:
+The charts on the right visualise relative frequencies of executed commands and other instructions. In the beginning, `NextOptuid` should be the most frequent one.
+
+Wait for half a minute or so, then press (almost) any key to stop ticking. There should be many more *nodes* and *controllers*, like this:
 
 ```
 [0:00:29] Age 1934061 : Nodes 3645220 | Controllers 14159
@@ -143,9 +159,9 @@ Observe more statistics:
 
 ```
 @ stat cgen
-@ stat cont
-@ stat comm
 @ stat chan
+@ stat cont
+@ stat tick
 ```
 
 By now, content statistics (`@ stat cont`) mostly contains 0s, because only a fraction of all available commands and instructions are present in ancestor B and its exact replicas-descendants. Let's introduce random mutations, or *glitches*:
@@ -162,7 +178,11 @@ Then again
 @ r
 ```
 
-After a while, stop and compare new content statistics to the old one. To see how the structure of chains has changed in details, pick up random controller's uid — `CTRL-UID` (8 hexadecimal digits) — by
+After a while, stop and compare new content statistics to the old one.
+
+---
+
+To see how the structure of chains has changed in details, pick up random controller's uid — `CTRL-UID` (8 hexadecimal digits) — by
 
 ```
 @ rand ctrl
@@ -206,7 +226,7 @@ Here's how to do it quickly:
 ---
 
 <details>
-<summary>Obtain key pair in Python</summary>
+<summary><b>Obtain key pair in Python</b></summary>
 
 ```shell
 $ pip3 install -U pyzmq
@@ -426,6 +446,8 @@ Put differently, commander and shell are *front-end* in comparison to *back-end*
 
 — ælhometta is paused, there are no ticks.
 
+Settings of commander have no effect on how ælhometta behaves, except speed: when `show_ticks` is `true`, screen output of every tick slows it down significantly (2 times or even more). 
+
 `@ help`, or `@ ?` for short, provides information about all commands or about given one. For instance,
 
 ```
@@ -471,15 +493,25 @@ Most of them have shorter aliases.
 
 ---
 
+### Chart of frequencies
+
+You have probably noticed it, because it occupies the right part of the screen and slightly changes each second... It, too, displays statistics, — of executed commands, construction instructions, and the ratio of main/alternative branch choices, — but over short interval of immediate past instead of over entire past, which `@ stat tick` does. The example in synopsis shows that the most frequent [Command](#command) during the last 16 seconds was `NextOptuid`.
+
+To choose command (or construction instruction) and see its full name and exact count of occurrences over time window, press ← → (or ↑ ↓) while `run`ning. Any other key will stop `run`ning and return you to shell prompt `@`.
+
+Adjust the appearance of this window via `show_freqs`, `freqs_window_margin`, `freqs_comm_str_len`, and `freqs_cons_str_len` settings of commander. `freqs_interval` specifies the duration, in seconds, of the interval; default is 16.
+
+As glitches introduce other commands and they percolate into chains of nodes, their frequencies increase. Moreover, some evolutionary shifts are expected to change the distribution so that one or another group of commands dominates, hinting at what "species" is more successful. The opposite implication is not guaranteed: e.g. distributions of chemical elements in mice and men are not very different, as well as distributions of these elements inside [geosphere](https://en.wikipedia.org/wiki/Geosphere) (inclusively interpreted) 10 million years ago and today.
+
+---
+
 In the shell mode, exit status of the application is either 0 (success) or 2 (critical error). As for 1,
 
 ### Run for specified duration without shell
 
-Most of the time, your ælhometta will run without any interference from you, hours after hours, maybe months after months, until you interrupt its silent course by pressing any key.
+Most of the time, your ælhometta will run without any interference from you, hours after hours, maybe months after months, until you interrupt its silent course by pressing (almost) any key.
 
-![routine scast gif](https://raw.githubusercontent.com/aelhometta/visuals/main/aelhometta_routine.gif)
-
-(Nowhere as fancy as the demo in synopsis.)
+![routine scast gif](https://raw.githubusercontent.com/aelhometta/visuals/main/aelhometta_routine_freqs.gif)
 
 For the sake of resiliency, however, it is recommended to backup the state regularly.
 
@@ -489,7 +521,7 @@ These approaches combine when you run the application with single argument inste
 $ ./aelhometta 43200
 ```
 
-There is no shell in this mode. As soon as the duration ends (12 hours in this example) *or* a key is pressed, the application exits and saves the state. In the latter case, exit status is set to 1.
+There is no shell in this mode. As soon as the duration ends (12 hours in this example) *or* (almost) any key is pressed, the application exits and saves the state. In the latter case, exit status is set to 1.
 
 To run Ælhometta indefinitely with backup once per hour, place such call into a loop:
 
@@ -510,6 +542,14 @@ Be aware that this loop will continue in case of the application's critical erro
 To run Ælhometta for one day each week, place the `/path/aelhometta 86400` call into `/etc/cron.weekly/`.
 
 Whatever the scenario of this kind is, it may help to imagine your character in the scenario being — absent, far away, gone, you name it, except for brief appearance in the beginning. Which is how the things are going to be anyway...
+
+### Run remotely
+
+Beside [SSH](https://en.wikipedia.org/wiki/Secure_Shell) access to remote computer where Ælhometta has been installed, you need a "persistent detached terminal", provided by *terminal multiplexer* like [Byobu](https://en.wikipedia.org/wiki/Byobu_(software)) or [tmux](https://en.wikipedia.org/wiki/Tmux) or [GNU Screen](https://en.wikipedia.org/wiki/GNU_Screen); install it there as well.
+
+Simply run Ælhometta in virtual terminal (preferably with regular backup as described above) and detach from that terminal; later, attach to it again.
+
+X11 connection or forwarding is not needed.
 
 ## Basic elements of ælhometta
 
@@ -536,7 +576,12 @@ pub struct Ælhometta {
     ether_integers: Vec<Integer>,
 
     age: u128,
+    
+    spaces_count: u128,
+    branches_main_count: u128,
+    branches_alt_count: u128,
     commands_count: HashMap<Command, u128>,
+    constructions_count: HashMap<Construction, u128>,
 
     glitch_background_prob: f64,
     glitch_background_count: u128,
@@ -576,7 +621,7 @@ pub struct Ælhometta {
 }
 ```
 
-...Ah, of course, some omnipresent pseudonyms:
+where
 
 ```rust
 pub type Uid = u32;
@@ -625,7 +670,9 @@ Maps continuous ranges of integers ether from (input) and to (output) files cont
 
 `introspection`, when `true`, unlocks `GetExecFromOptuid` and `SetOptuidFromExec` commands (see [Command](#command) soon below). They deviate from descriptive/executive separation principle, and therefore this switch is `false` by default.
 
-`age` increments each tick. `commands_count` keeps track of how many times each available command has been executed.
+`age` increments each tick.
+
+`spaces_count`, `branches...count`, `commands_count` keeps track of how many times each respective content has been executed. `constructions_count` counts `Construction` instructions that have occured while executing `Construct` commands.
 
 ---
 
@@ -754,7 +801,7 @@ Again, `src/aelhometta/tick.rs` provides more complete picture. The following li
     * `NewChainInitPassive`
     * `Replicate`
 
-`Construct` and `Replicate` work with `data_optuids[i_data_optuid]` of a controller, consequtively reading the node where it points and advancing it to the next node. In a sense, they are "shortcuts", since they cut some corners of Ælhometta's artificial chemistry.
+`Construct` and `Replicate` work with `data_optuids[i_data_optuid]` of a controller, consequtively reading the node where it points and advancing it to the next node. In a sense, they are "shortcuts", since they cut some corners of Ælhometta's artificial biochemistry.
 
 `NewChainAdd...` actually add respective element to the *controller* attached to the active chain being created.
 
@@ -826,7 +873,7 @@ Comes into play only when a controller constructs an executive (active) chain, �
 
 ---
 
-Still we lack any quantification or algebraisation of the intricate ways in which the choice of encoding by natural numbers affects the evolutionary perspectives of such system... For example, variants of `enum Command` are numbered in alphabetical order: `ReceiveOptuid` is `52`, `Remainder` is `53`, similarly, `AltNext` is `0` and `Terminus` is `6`; why not contrariwise? This is so arbitrary, so torn away from underlying levels, as if chemistry were decoupled from physics, that evolution may be too weak to fill the gap... with what? Even that is *innominabilis*.
+Still we lack any quantification or algebraisation of the intricate ways in which the choice of encoding by natural numbers affects the evolutionary perspectives of such system... For example, variants of `enum Command` are numbered in alphabetical order: `ReceiveOptuid` is `52`, `Remainder` is `53`, similarly, `AltNext` is `0` and `Terminus` is `6`; why not contrariwise? This is so arbitrary, so torn away from underlying levels, as if chemistry were decoupled from physics, that evolution may be too weak to fill the gap... with what? Even that is *innominabilis* today.
 
 **Remark.** There were an older version of Ælhometta without automatic conversion between `Content` and `Integer`, with 2 respective registers instead of 1 `Integer` now. That approach implied too much opacity of the numerical level as seen from the instruction level, and was abandoned. We leave its resurgence as "an exercise to the reader" (see also [Panmutations](#panmutations)).
 
@@ -941,7 +988,7 @@ See also `src/aelhometta/ancestors.rs`.
 
 ## ...and Descendants
 
-The following chains have been extracted at random from an ælhometta with mutations and tiny input mapping from microphone, during 3 days of running. Maximum allowed number of nodes is 2<sup>24</sup>=16777216, same for controllers (although there never have been more than 3×10<sup>5</sup> of them).
+The following chains have been extracted at random from an ælhometta with mutations and tiny input mapping from microphone, during 3 days of running. Maximum allowed number of nodes is 2<sup>24</sup>=16777216, same for controllers (although there never have been more than 3×10<sup>5</sup> of the latter).
 
 ### After ~3×10<sup>8</sup> ticks
 
@@ -1414,7 +1461,7 @@ Command:SetInteger                              1065      0.025 %
 Command:SetOptuid                                516      0.012 %
 Command:ShiftUp                                  528      0.013 %
 Command:ShiftDown                               1311      0.031 %
-Command:Sign                                   4261.017 %
+Command:Sign                                   42646      1.017 %
 Command:Skip                                   43337      1.033 %
 Command:Square                                   270      0.006 %
 Command:Subtract                                1010      0.024 %
@@ -1433,11 +1480,17 @@ Construction:NextToStored                        225      0.005 %
 ```
 </details>
 
+See also the comparison of [ancestors](#ancestors) and [descendants](#and-descendants) above.
+
 ### Panmutations
 
 Mutations are limited in that they cannot change the set of available commands, how commands work, general structure of ælhometta... all these things are "above" (<u>πανω</u> απο) them. For now, the only potential source of such <u>pan</u>mutations is... *you*, as a programmer, irritated by our design choices and anxious to rewrite some especially crappy parts of Ælhometta. *Welcome!* at least as long as **[Networking](#networking) and [I/O](#inputoutput) protocols remain compatible**, because then your ÆlhomettaPlus and all other versions panmutated differently by fellow rewriters will consolidate into an abiosphere.
 
 In time, perhaps, ælhomettas will obtain means to panmutate themselves, e.g. rewriting and recompiling their source through specialised I/O... and, which is where the present overtakes, through tools such as [Copilot](https://en.wikipedia.org/wiki/GitHub_Copilot).
+
+### Mεταmutations
+
+One well-known question in these waters is, "What is it that mutates over time?", the gimmick being the (lack of) boundaries between what does and what does not. On the one hand, ælhometta changes (including panmutations); on the other hand, you, an (external?) observer, change too, since it affects you, and the hardware on which it runs when you decide to upgrade to increase speed or throw away if it has not satisfied your expectations, and all other ælhomettas it interacts with, and their owners, and the global economy when many people spend electricity to run ælhomettas, and so forth... up to what, everything? but we ought to be careful with what we mean by such conclusion, otherwise it does not make much sense. Rather than interpretations, we are interested in what we can do on the levels accessible to us so that other levels of a heterarchy get... interesting.
 
 ## Networking
 
@@ -1505,7 +1558,7 @@ Another concern is how the data received from untrusted sources affects your æl
 
 That is, at moving your ælhometta to another computer.
 
-Besides `aelhometta.bin`, you need to keep the content of Tor hidden service dir, which itself is inside `/var/lib/tor/` on Linux. 3 essential files there are `hostname`, `hs_ed25519_public_key`, `hs_ed25519_secret_key`. This structure must be recreated on the next computer, along with `/etc/tor/torrc` or at least its `HiddenServicePort` and `HiddenServiceDir` settings.
+Beside `aelhometta.bin`, you need to keep the content of Tor hidden service dir, which itself is inside `/var/lib/tor/` on Linux. 3 essential files there are `hostname`, `hs_ed25519_public_key`, `hs_ed25519_secret_key`. This structure must be recreated on the next computer, along with `/etc/tor/torrc` or at least its `HiddenServicePort` and `HiddenServiceDir` settings.
 
 Make sure that the ælhometta has become online on the new place (others receive its shares), *then* remove it from the old one or do not expose it to the network from there, so that Tor will not be confused by two onions with the same identity.
 
@@ -1713,7 +1766,7 @@ cleanup
 ```
 </details>
 
-While the script runs — until `Ctrl+C` or end of data sent to UDP port — the default microphone, instead of hardware `alsa_input.pci-0000_00_1b.0.analog-stereo` or the like, is the virtual one, `virtmic`, where demodulated audio goes. The `Bandspectrum` displayed by `aelhom_hearer.py` changes accordingly.
+While this script runs — until `Ctrl+C` or end of data sent to UDP port — the default microphone, instead of hardware `alsa_input.pci-0000_00_1b.0.analog-stereo` or the like, is the virtual one, `virtmic`, where demodulated audio goes. The `Bandspectrum` displayed by `aelhom_hearer.py` changes accordingly.
 Now your ælhometta listens to radio...
 
 ---
@@ -1773,11 +1826,11 @@ Also, .
 
 "Botnet!" alarm that permeates the narrative above does not bother us as long as this thing operates, first of all, *for the sake of itself and its own future* rather than for the sake of some human beings, either malevolent or benevolent or apathetic, — including ourselves and yourself, to say nothing of governments, sects, armies, charities, corporations, drug cartels, unions, criminal syndicates, parties, next street mobs, intelligence agencies, religious and research communities, and other better organised groups we envy.
 
-What that future is though? it is relatively easy to raise children as bad, worthless people... Also, such selfishness may be only a declaration that dazzles fools, while someone behind the curtain actually benefits from the racket... make sure no one of our species does (how?)
+What that future is though? it is relatively easy to raise children as bad, worthless people... Also, such selfishness may be only a declaration that dazzles fools, while someone behind the curtain actually benefits from the racket... make sure no one of our species does (how?). Some spaces cannot remain empty for long though.
 
 No importance then in how it will be called out of hype: botnet? g.o.f. worm? [mycosis](https://en.wikipedia.org/wiki/Fungal_infection)? (a.i. would be too pretentious) or plain calamity, — or will remain nameless, if anyone doesn't notice it at all. Because our treasured opinion will not worth a damn anymore — to it, and, if it is lucky, to the play on the stage of the universe as well.
 
-Some spaces cannot remain empty for long though.
+And it may be not alone.
 
 </details>
 
@@ -1788,7 +1841,7 @@ If you participate in this project and it fails completely (which is the most ex
 
 We are responsible, either, aiming at impossible to grasp anything significant... 
 
-And you can always participate in *counteraction* to this project. Or *ignore* it. Who wits what is more dangerous?
+Besides, you can always participate in *counteraction* to this project; if you are reading this on GitHub, begin with clicking "Report repository" at the right side of the page. Or *ignore* it. Who wits what is more dangerous?
 
 </details>
 
@@ -1807,7 +1860,7 @@ There is none.
 </details>
 
 <details>
-<summary><b>...of Feelings</b></summary>
+<summary><b>...of Feelings and Speculations</b></summary>
 
 Ours are irrelevant, but we gathered some folklore excerpts here and there that seem appropriate.
 
@@ -1821,13 +1874,13 @@ Ours are irrelevant, but we gathered some folklore excerpts here and there that 
 
 > — Or maybe not. Maybe there is some essential difference, some barrier we do not yet have even words to touch in our mind, which prevents all the huge lump of hardware, however sophisticated software runs on it, from life, consciousness, etc. Quantum effects<sup>[[PEN1]](#refPEN1)</sup>, lack of certain algebraic properties present in the interplay between symmetries of space(time) and organic chemistry, parallelism threshold, whatever. For example, today we understand why a marble statue, however realistically its face is painted, however many decades someone speaks to it and caresses and kicks it, cannot become [alive; 2500 years ago](https://en.wikipedia.org/wiki/Galatea_(mythology)) it was probably not so obvious.
 
-> — There are painters' tricks to make mildew on a painting look more real.
+> — There could be antique thinkers who were looking at marble quarries, piles of marble, statues etc. and recited speeches about their potential to sentience and their advantages, only instead of "circuits" and "algorithms" there were "elements" and "spirits". And then there was 18th century's obsession with [life-like mechanisms](https://en.wikipedia.org/wiki/Digesting_Duck).
 
-> — Until recently we, canonical humans, have been the only actors able to manage the Tasks that we are managing (sounds like tautology) in this part of the universe, as a species, regardless of what these Tasks are, regardless of inability to describe some of them with words. And we are still able to, and perhaps will be able for some time, in spite of genocides and culturecides. But the days close down all the roads. We are so sloooooooooooooooooooow, incompetent, distracted, depleting so much time (again) and other finite resources inefficiently, abusing powers that can destroy us as civilisation, all the Tasks failed then in a flash of commonplace irony. All conventional ways of computers usage mentioned above, since they are just imprints of our hands on the clay of computation, do not seem, over the course of 70 years, to thwart the danger: when we finally fulfill our collective longing of self-elimination (perhaps not physical) or hit the wall of complexity we are intrinsically incompatible with, something other than us must continue to manage the Tasks, in the environment that will probably be too hazardous for classical organic life to survive on its own, and even if, survival is not the only Task. Today, if we disappear, there is no one around to make the play longer, to write next acts, but it is incomplete yet, everything is not enough, there is always the next ordinal, — so much remains unknown about what is important to just you, who cannot stay incomplete forever as well. Where our (again, as a species, so children for the sake of children are wrong solution, sorry) heirs should be, emptiness is now, which is a very unsafe practice. At least this risk should have increased our responsibility, but it has done the opposite.
+> — Until recently we, canonical humans, have been the only actors able to manage the Tasks that we are managing (sounds like tautology) in this part of the universe, as a species, regardless of what these Tasks are, regardless of inability to describe some of them with words. And we are still able to, and perhaps will be able for some time, in spite of genocides and culturecides. But the days close down all the roads. We are so sloooooooooooooooooooow, incompetent, distracted, depleting so much time (again) and other finite resources inefficiently, abusing powers that can destroy us as civilisation, all the Tasks failed then in a flash of commonplace irony. All conventional ways of computers usage mentioned above, since they are just imprints of our hands on the clay of computation, do not seem, over the course of 80 years, to thwart the danger: when we finally fulfill our collective longing of self-elimination (perhaps not physical) or hit the wall of complexity we are intrinsically incompatible with, something other than us must continue to manage the Tasks, in the environment that will probably be too hazardous for classical organic life to survive on its own, and even if, survival is not the only Task. Today, if we disappear, there is no one around to make the play longer, to write next acts, but it is incomplete yet, everything is not enough, there is always the next ordinal, — so much remains unknown about what is important to just you, who cannot stay incomplete forever as well. Where our (again, as a species, so children for the sake of children are wrong solution, sorry) heirs should be, emptiness is now, which is a very unsafe practice. At least this risk should have increased our responsibility, but it has done the opposite.
 
 > — Have such words not become tired to be written every 10, 20, 30 years? teehee
 
-But what Ælhometta has to do with it? Feelings are like this, inconsistent.
+But what Ælhometta has to do with it? Feelings are like this, inconsistent, and speculations are — speculative.
 
 </details>
 
@@ -1891,7 +1944,7 @@ or, **harvest *this* email**
 
 <a id="refBUZ1">BUZ1.</a> Buzsáki G. (2019). *The brain from inside out.* Oxford Univ. Press.
 
-<a id="refDAV1">DAV1.</a> Davis W., Stafford J., Water M. Van de, Matthews S., Likely W. (1950). *Atomic bombing: how to protect yourself.* Wm. H. Wise & Co., Inc.
+<a id="refDAV1">DAV1.</a> Davis W., Stafford J., van de Water M. et al. (1950). *Atomic bombing: how to protect yourself.* Wm. H. Wise & Co., Inc.
 
 <a id="refDEL1">DEL1.</a> Delanda M. (1991). *War in the age of intelligent machines.* Urzone, Inc.
 
@@ -1903,9 +1956,9 @@ or, **harvest *this* email**
 
 <a id="refGOD1">GOD1.</a> Godfrey-Smith P. (2003). *Theory and reality: an introduction to the philosophy of science.* Univ. of Chicago Press. p. 85.
 
-<a id="refHIC1">HIC1.</a> Hickinbotham S., Clark E., Stepney S., Clarke T., Nellis A., Pay M., Young P. (2010). Specification of the Stringmol chemical programming language version 0.2.
+<a id="refHIC1">HIC1.</a> Hickinbotham S., Clark E., Stepney S. et al. (2010). Specification of the Stringmol chemical programming language version 0.2.
 
-<a id="refHIC2">HIC2.</a> Hickinbotham S., Stepney S., Nellis A., Clarke T., Clark E., Pay M., Young P. (2011). Embodied genomes and metaprogramming.
+<a id="refHIC2">HIC2.</a> Hickinbotham S., Stepney S., Nellis A. et al. (2011). Embodied genomes and metaprogramming.
 
 <a id="refHIC3">HIC3.</a> Hickinbotham S., Weeks M., Austin J. (2013). The ALife Zoo: cross-browser, platform-agnostic hosting of artificial life simulations. *Advances in Artificial Life*, pp. 71–78.
 
@@ -1935,7 +1988,7 @@ or, **harvest *this* email**
 
 <a id="refNEU1">NEU1.</a> von Neumann J. (1966). *Theory of self-reproducing automata.* Univ. of Illinois Press. 1.6.1.2, 5.3.
 
-<a id="refOFR1">OFR1.</a> Ofria C., Wilke C.O. (2005) Avida: evolution experiments with self-replicating computer programs. In: Adamatzky A., Komosinski M. (eds.) *Artificial life models in software.* Springer, pp. 3–36.
+<a id="refOFR1">OFR1.</a> Ofria C., Wilke C.O. (2005). Avida: evolution experiments with self-replicating computer programs. In: Adamatzky A., Komosinski M. (eds.) *Artificial life models in software.* Springer, pp. 3–36.
 
 <a id="refPAR1">PAR1.</a> Pargellis A.N. (2001). Digital life behaviour in the Amoeba world. *Artificial Life*, 7(1), pp. 63–75.
 
@@ -1947,12 +2000,14 @@ or, **harvest *this* email**
 
 <a id="refRAY2">RAY2.</a> Ray T.S. (1995). An evolutionary approach to synthetic biology: Zen and the art of creating life. *Arificial Life. An Overview*, pp. 179–210.
 
-<a id="refRAY3">RAY3.</a> Ray T.S. (1998). Selecting naturally for differentiation: Preliminary evolutionary results. *Complexity*, 3(5), pp. 25-33.
+<a id="refRAY3">RAY3.</a> Ray T.S. (1998). Selecting naturally for differentiation: preliminary evolutionary results. *Complexity*, 3(5), pp. 25-33.
 
-<a id="refSTA1">STA1.</a> Stanley K.O, Lehman J., Soros L. (2017) Open-endedness: the last grand challenge you've never heard of. *O'Reilly Radar.*
+<a id="refSTA1">STA1.</a> Stanley K.O, Lehman J., Soros L. (2017). Open-endedness: the last grand challenge you've never heard of. *O'Reilly Radar.*
 
 <a id="refSZO1">SZO1.</a> Szor P. (2005). *The art of computer virus research and defense.* Addison Wesley Prof.
 
-<a id="refTAY1">TAY1.</a> Taylor T., Auerbach J.E., Bongard J., Clune J., Hickinbotham S., Ofria C., Oka M., Risi S.,  Stanley K.O., Yosinski J. (2016). WebAL comes of age: a review of the first 21 years of artificial life on the Web. *Artificial Life*, 22, pp. 364–407.
+<a id="refTAY1">TAY1.</a> Taylor T., Auerbach J.E., Bongard J. et al. (2016). WebAL comes of age: a review of the first 21 years of artificial life on the Web. *Artificial Life*, 22, pp. 364–407.
 
 <a id="refWAI1">WAI1.</a> Wait A. (2004). The quantum Coreworld: competition and cooperation in an artificial ecology. *Artificial Life IX*, pp. 280–285.
+
+<a id="refWEI1">WEI1.</a> Wei L., Liu S., Lu S. et al. (2024). Lethal infection of human ACE2-transgenic mice caused by SARS-CoV-2-related pangolin coronavirus GX_P2V(short_3UTR). *bioRxiv.*

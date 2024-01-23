@@ -51,6 +51,14 @@ impl Commander {
         if paramstr.len() >= 1 {
             let topic = paramstr[0].to_lowercase();
             match topic.as_str() {
+                "cgen" => {
+                    let cg_stats = æh.generation_statistics();
+                    println!("{}{}", format!("{:12}", "Minimum").dark_blue(), format!("{:>12}", cg_stats.minimum).blue());
+                    println!("{}{}", format!("{:12}", "Average").dark_blue(), format!("{:>12}", cg_stats.average).blue());
+                    println!("{}{}", format!("{:12}", "Maximum").dark_blue(), format!("{:>12}", cg_stats.maximum).blue());
+                    Ok(())
+                },
+
                 "chan" => {
                     let ch_stats = æh.channels_statistics();
                     println!("{} {} {}{}{}",
@@ -67,20 +75,6 @@ impl Commander {
                         "/".dark_grey(),
                         format!("{}", æh.ether_integers().len()).blue()
                     );
-                    Ok(())
-                },
-    
-                "comm" => {
-                    let mut comm_str_count: BTreeMap<String, u128> = BTreeMap::new();
-                    for (command, count) in æh.commands_count() {
-                        comm_str_count.insert(format!("{:?}", *command), *count);
-                    }
-                    for (comm_str, count) in &comm_str_count {
-                        println!("{}{}",
-                            format!("{:<32}", comm_str).yellow(),
-                            format!("{:>16}", *count).blue()
-                        );
-                    }
                     Ok(())
                 },
     
@@ -101,11 +95,46 @@ impl Commander {
                     Ok(())
                 },
     
-                "cgen" => {
-                    let cg_stats = æh.generation_statistics();
-                    println!("{}{}", format!("{:12}", "Minimum").dark_blue(), format!("{:>12}", cg_stats.minimum).blue());
-                    println!("{}{}", format!("{:12}", "Average").dark_blue(), format!("{:>12}", cg_stats.average).blue());
-                    println!("{}{}", format!("{:12}", "Maximum").dark_blue(), format!("{:>12}", cg_stats.maximum).blue());
+                "tick" => {
+                    println!("{}{}",
+                        format!("{:32}", "Spaces").dark_yellow(),
+                        format!("{:>16}", æh.spaces_count()).blue()
+                    );
+
+                    println!("{:4}{}", " ", "Branches".dark_grey());
+                    println!("{}{}",
+                        format!("{:32}", "Branches (main)").dark_magenta(),
+                        format!("{:>16}", æh.branches_main_count()).blue()
+                    );
+                    println!("{}{}",
+                        format!("{:32}", "Branches (alt)").dark_magenta(),
+                        format!("{:>16}", æh.branches_alt_count()).blue()
+                    );
+
+                    println!("{:4}{}", " ", "Commands".dark_grey());
+                    let mut comm_str_count: BTreeMap<String, u128> = BTreeMap::new();
+                    for (command, count) in æh.commands_count() {
+                        comm_str_count.insert(format!("{:?}", *command), *count);
+                    }
+                    for (comm_str, count) in &comm_str_count {
+                        println!("{}{}",
+                            format!("{:<32}", comm_str).yellow(),
+                            format!("{:>16}", *count).blue()
+                        );
+                    }
+
+                    println!("{:4}{}", " ", "Constructions".dark_grey());
+                    let mut cons_str_count: BTreeMap<String, u128> = BTreeMap::new();
+                    for (construction, count) in æh.constructions_count() {
+                        cons_str_count.insert(format!("{:?}", *construction), *count);
+                    }
+                    for (cons_str, count) in &cons_str_count {
+                        println!("{}{}",
+                            format!("{:<32}", cons_str).magenta(),
+                            format!("{:>16}", *count).blue()
+                        );
+                    }
+
                     Ok(())
                 },
     

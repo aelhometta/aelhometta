@@ -69,9 +69,11 @@ use super::{
 };
 
 const SIGNATURE: &str = "aelhometta";
-pub const FORMAT_VERSION: &str = "000017";
-const LOADABLE_FORMATS: [&str; 2] = [
+pub const FORMAT_VERSION: &str = "000019";
+const LOADABLE_FORMATS: [&str; 4] = [
     "000016",
+    "000017",
+    "000018",
     FORMAT_VERSION
 ];
 
@@ -454,9 +456,19 @@ impl<W: Write> WriteBin<&Ælhometta> for W {
 
         self.write_bin(æh.age)?;
 
+        self.write_bin(æh.spaces_count)?;
+        self.write_bin(æh.branches_main_count)?;
+        self.write_bin(æh.branches_alt_count)?;
+
         self.write_bin(æh.commands_count.len())?;
         for (command, count) in & æh.commands_count {
             self.write_bin(*command)?;
+            self.write_bin(*count)?;
+        }
+
+        self.write_bin(æh.constructions_count.len())?;
+        for (construction, count) in & æh.constructions_count {
+            self.write_bin(*construction)?;
             self.write_bin(*count)?;
         }
 
@@ -529,11 +541,30 @@ impl<R: Read> ReadBin<Ælhometta> for R {
         let new_node_uid = self.read_bin()?;
         let l: usize = self.read_bin()?;
         let mut nodes = HashMap::with_capacity(l);
-        for _ in 0..l {
-            let uid = self.read_bin()?;
-            let node = self.read_bin()?;
-            nodes.insert(uid, node);
+        match file_format_version.as_ref() { // example of conversion between Command encoding in different formats
+            FORMAT_VERSION => {
+                for _ in 0..l {
+                    let uid = self.read_bin()?;
+                    let node = self.read_bin()?;
+                    nodes.insert(uid, node);
+                }
+            },
+            _ => {
+                for _ in 0..l {
+                    let uid = self.read_bin()?;
+                    let mut node: Node = self.read_bin()?;
+                    node.b_content = match node.b_content {
+                        18 => 19, // IntegerToIntegerIndex was 18, since "000019" is 19
+                        19 => 18, // IntegerToIntegerChannel was 19, since "000019" is 18
+                        61 => 62, // ShiftUp was 61, since "000019" is 62
+                        62 => 61, // ShiftDown was 62, since "000019" is 61
+                        _ => node.b_content
+                    };
+                    nodes.insert(uid, node);
+                }
+            }
         }
+
         let l: usize = self.read_bin()?;
         let mut nodes_historing = Vec::with_capacity(l);
         for _ in 0..l {
@@ -557,8 +588,7 @@ impl<R: Read> ReadBin<Ælhometta> for R {
         let i_controllers_historing = self.read_bin()?;
 
         let introspection = match file_format_version.as_ref() {
-            "000016" => false,
-            FORMAT_VERSION => self.read_bin()?,
+            "000017" | "000018" | FORMAT_VERSION => self.read_bin()?,
             _ => false
         };
 
@@ -576,6 +606,21 @@ impl<R: Read> ReadBin<Ælhometta> for R {
 
         let age = self.read_bin()?;
 
+        let spaces_count = match file_format_version.as_ref() {
+            "000018" | FORMAT_VERSION => self.read_bin()?,
+            _ => 0
+        };
+
+        let branches_main_count = match file_format_version.as_ref() {
+            "000018" | FORMAT_VERSION => self.read_bin()?,
+            _ => 0
+        };
+
+        let branches_alt_count = match file_format_version.as_ref() {
+            "000018" | FORMAT_VERSION => self.read_bin()?,
+            _ => 0
+        };
+
         let l: usize = self.read_bin()?;
         let mut commands_count = HashMap::with_capacity(l);
         for _ in 0..l {
@@ -583,6 +628,20 @@ impl<R: Read> ReadBin<Ælhometta> for R {
             let count = self.read_bin()?;
             commands_count.insert(command, count);
         }
+
+        let constructions_count = match file_format_version.as_ref() {
+            "000018" | FORMAT_VERSION => {
+                let l: usize = self.read_bin()?;
+                let mut cons_count = HashMap::with_capacity(l);
+                for _ in 0..l {
+                    let cons = self.read_bin()?;
+                    let count = self.read_bin()?;
+                    cons_count.insert(cons, count);
+                }
+                cons_count
+            },
+            _ => super::new_constructions_count()
+        };
 
         let glitch_background_prob = self.read_bin()?;
         let glitch_background_count = self.read_bin()?;
@@ -650,7 +709,11 @@ impl<R: Read> ReadBin<Ælhometta> for R {
             ether_optuids,
             ether_integers,
             age,
+            spaces_count,
+            branches_main_count,
+            branches_alt_count,
             commands_count,
+            constructions_count,
             glitch_background_prob,
             glitch_background_count,
             glitch_replicate_prob,

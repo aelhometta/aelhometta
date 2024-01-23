@@ -74,13 +74,18 @@ use crate::aelhometta::{
 };
 
 pub const DEFAULT_COMMANDER_FILENAME: &str = "commander.json";
-pub const DEFAULT_SEQUENCE_LIMIT: usize = 0x400;
 pub const HISTORY_MAX_LEN: usize = 0x10000;
 
 #[derive(Serialize, Deserialize)]
 struct Settings {
     #[serde(default)] show_ticks: bool,
-    #[serde(default)] show_abs_time: bool
+    #[serde(default)] show_abs_time: bool,
+    #[serde(default = "def_sequence_def_limit")] sequence_def_limit: usize,
+    #[serde(default = "def_show_freqs")] show_freqs: bool,
+    #[serde(default = "def_freqs_interval")] freqs_interval: usize, // seconds
+    #[serde(default = "def_freqs_window_margin")] freqs_window_margin: usize,
+    #[serde(default = "def_freqs_comm_str_len")] freqs_comm_str_len: usize,
+    #[serde(default = "def_freqs_cons_str_len")] freqs_cons_str_len: usize,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -95,9 +100,16 @@ struct History {
 }
 
 #[derive(Serialize, Deserialize)]
+struct Selections {
+    i_command: usize,
+    i_construction: usize
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct Commander {
     settings: Settings,
-    history: History
+    history: History,
+    #[serde(default = "def_selections")] selections: Selections
 }
 
 pub trait ParseHex {
@@ -108,11 +120,45 @@ pub trait ParseErrorPrefixise {
     fn prefixised<T>(&self, prefix: &str) -> Result<T, String>;
 }
 
+fn def_show_freqs() -> bool {
+    true
+}
+
+fn def_sequence_def_limit() -> usize {
+    0x400
+}
+
+fn def_freqs_interval() -> usize {
+    16
+}
+
+fn def_freqs_window_margin() -> usize {
+    3
+}
+
+fn def_freqs_comm_str_len() -> usize {
+    13
+}
+
+fn def_freqs_cons_str_len() -> usize {
+    12
+}
+
+fn def_selections() -> Selections {
+    Selections::new_default()
+}
+
 impl Settings {
     fn new_default() -> Self {
         Self {
             show_ticks: false,
-            show_abs_time: false
+            show_abs_time: false,
+            sequence_def_limit: def_sequence_def_limit(),
+            show_freqs: def_show_freqs(),
+            freqs_interval: def_freqs_interval(),
+            freqs_window_margin: def_freqs_window_margin(),
+            freqs_comm_str_len: def_freqs_comm_str_len(),
+            freqs_cons_str_len: def_freqs_cons_str_len()
         }
     }
 }
@@ -163,6 +209,16 @@ impl History {
 
 }
 
+impl Selections {
+    fn new_default() -> Self {
+        Self {
+            i_command: 0,
+            i_construction: 0
+        }
+    }
+
+}
+
 impl Commander {
     fn print_state(æh: &Ælhometta, full: bool) {
         print!("{} {} {} {} {} {} {} {}", 
@@ -190,9 +246,11 @@ impl Commander {
     pub fn new_default() -> Self {
         let settings = Settings::new_default();
         let history = History::new_default();
+        let selections = Selections::new_default();
         Self {
             settings,
-            history
+            history,
+            selections
         }
     }
 
