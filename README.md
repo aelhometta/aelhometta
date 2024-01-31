@@ -1815,7 +1815,7 @@ So far... nothing to worry about. Not a thing.
 
 In comparison with names of older sisters & brothers, this one has lower [taxonomic rank](https://en.wikipedia.org/wiki/Taxonomic_rank), and the ceiling of complexity expected to evolve is not so high as well.
 
-There are science fiction stories that go in opposite direction<sup>[[LEM1]](#refLEM1)</sup>.
+There are science fiction stories that go in opposite direction<sup>[[KEL1]](#refKEL1), [[LEM1]](#refLEM1)</sup>.
 
 Also, .
 
@@ -1876,7 +1876,7 @@ Ours are irrelevant, but we gathered some folklore excerpts here and there that 
 
 > — There could be antique thinkers who were looking at marble quarries, piles of marble, statues etc. and recited speeches about their potential to sentience and their advantages, only instead of "circuits" and "algorithms" there were "elements" and "spirits". And then there was 18th century's obsession with [life-like mechanisms](https://en.wikipedia.org/wiki/Digesting_Duck).
 
-> — Until recently we, canonical humans, have been the only actors able to manage the Tasks that we are managing (sounds like tautology) in this part of the universe, as a species, regardless of what these Tasks are, regardless of inability to describe some of them with words. And we are still able to, and perhaps will be able for some time, in spite of genocides and culturecides. But the days close down all the roads. We are so sloooooooooooooooooooow, incompetent, distracted, depleting so much time (again) and other finite resources inefficiently, abusing powers that can destroy us as civilisation, all the Tasks failed then in a flash of commonplace irony. All conventional ways of computers usage mentioned above, since they are just imprints of our hands on the clay of computation, do not seem, over the course of 80 years, to thwart the danger: when we finally fulfill our collective longing of self-elimination (perhaps not physical) or hit the wall of complexity we are intrinsically incompatible with, something other than us must continue to manage the Tasks, in the environment that will probably be too hazardous for classical organic life to survive on its own, and even if, survival is not the only Task. Today, if we disappear, there is no one around to make the play longer, to write next acts, but it is incomplete yet, everything is not enough, there is always the next ordinal, — so much remains unknown about what is important to just you, who cannot stay incomplete forever as well. Where our (again, as a species, so children for the sake of children are wrong solution, sorry) heirs should be, emptiness is now, which is a very unsafe practice. At least this risk should have increased our responsibility, but it has done the opposite.
+> — Until recently we, canonical humans, have been the only actors able to manage the Tasks that we are managing (sounds like tautology) in this part of the universe, as a species, regardless of what these Tasks are, regardless of inability to describe some of them with words. And we are still able to, and perhaps will be able for some time, in spite of -cides. But the days close down all the roads. We are so sloooooooooooooooooooow, incompetent, distracted, depleting so much time (again) and other finite resources inefficiently, abusing powers that can destroy us as civilisation, all the Tasks failed then in a flash of commonplace irony. All conventional ways of computers usage mentioned above, since they are just imprints of our hands on the clay of computation, do not seem, over the course of 80 years, to thwart the danger: when we finally fulfill our collective longing of self-elimination (perhaps not physical) or hit the wall of complexity we are intrinsically incompatible with, something other than us must continue to manage the Tasks, in the environment that will probably be too hazardous for classical organic life to survive on its own, and even if, survival is not the only Task. Today, if we disappear, there is no one around to make the play longer, to write next acts, but it is incomplete yet, everything is not enough, there is always the next ordinal, — so much remains unknown about what is important to just you, who cannot stay incomplete forever as well. Where our (again, as a species, so children for the sake of children are wrong solution, sorry) heirs should be, emptiness is now, which is a very unsafe practice. At least this risk should have increased our responsibility, but it has done the opposite.
 
 > — Have such words not become tired to be written every 10, 20, 30 years? teehee
 
@@ -1973,6 +1973,8 @@ or, **harvest *this* email**
 <a id="refJON1">JON1.</a> Jonas E., Kording K.P. (2017). Could a neuroscientist understand a microprocessor? *PLoS Comput. Biol.*, 13(1), e1005268.
 
 <a id="refKAV1">KAV1.</a> Kavanagh K. (ed.) (2018). *Fungi: biology and applications. 3rd ed.* Wiley Blackwell.
+
+<a id="refKEL1">KEL1.</a> Kelleam J.E. (1939). Rust. *Astounding Science-Fiction*, 24(2), pp. 133–140.
 
 <a id="refKOZ1">KOZ1.</a> Koza J.R. (1994). Artificial life: spontaneous emergence of self-replicating and evolutionary self-improving computer programs. *Artificial Life III*, pp. 225–262.
 
