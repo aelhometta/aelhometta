@@ -1,5 +1,5 @@
 Version 1.0.4 (2024.02.04)
---------------------------
+-------------------------
 
 * Extended "introspection" that affected 2 commands (`GetExecFromOptuid`, `SetOptuidFromExec`) to "command switches" that are able to NOP (substitute with `Space` implicitly at execution) *any* command. (Those 2 are NOPped by default as before.) The switches are also shown in execution statistics chart.
 
