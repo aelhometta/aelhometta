@@ -180,6 +180,10 @@ impl Ælhometta {
 
     pub fn peer_repose(&mut self) -> Result<(), String> {
         if self.efunguz.is_some() {
+            // "now" becomes "before"
+            self.in_permitted_before_num += self.efunguz.as_ref().unwrap().in_permitted_num();
+            self.in_attempted_before_num += self.efunguz.as_ref().unwrap().in_attempted_num();
+
             self.efunguz = None;
             self.exposed = false;
             Ok(())

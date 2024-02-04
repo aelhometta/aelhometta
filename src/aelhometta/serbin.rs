@@ -69,12 +69,14 @@ use super::{
 };
 
 const SIGNATURE: &str = "aelhometta";
-pub const FORMAT_VERSION: &str = "000019";
-const LOADABLE_FORMATS: [&str; 4] = [
-    "000016",
-    "000017",
+pub const FORMAT_VERSION: &str = "00001B";
+const LOADABLE_FORMATS: [&str; 6] = [
+    FORMAT_VERSION,
+    "00001A",
+    "000019",
     "000018",
-    FORMAT_VERSION
+    "000017",
+    "000016"
 ];
 
 impl<W: Write> WriteBin<Command> for W {
@@ -442,7 +444,7 @@ impl<W: Write> WriteBin<&Ælhometta> for W {
         }
         self.write_bin(æh.i_controllers_historing)?;
 
-        self.write_bin(æh.introspection)?;
+        self.write_bin(æh.commandswitch)?;
 
         self.write_bin(æh.ether_optuids.len())?;
         for opt in & æh.ether_optuids {
@@ -503,6 +505,20 @@ impl<W: Write> WriteBin<&Ælhometta> for W {
             self.write_bin(pk.as_str())?;
         }
 
+        // "before" + "now"
+        let mut n = æh.in_permitted_before_num;
+        if let Some(ref efunguz) = æh.efunguz {
+            n += efunguz.in_permitted_num();
+        }
+        self.write_bin(n)?;
+
+        // "before" + "now"
+        let mut n = æh.in_attempted_before_num;
+        if let Some(ref efunguz) = æh.efunguz {
+            n += efunguz.in_attempted_num();
+        }
+        self.write_bin(n)?;
+
         self.write_bin(æh.output_mappings.len())?;
         for ifm in & æh.output_mappings {
             self.write_bin(ifm)?;
@@ -542,7 +558,7 @@ impl<R: Read> ReadBin<Ælhometta> for R {
         let l: usize = self.read_bin()?;
         let mut nodes = HashMap::with_capacity(l);
         match file_format_version.as_ref() { // example of conversion between Command encoding in different formats
-            FORMAT_VERSION => {
+            FORMAT_VERSION | "00001A" | "000019" => {
                 for _ in 0..l {
                     let uid = self.read_bin()?;
                     let node = self.read_bin()?;
@@ -587,9 +603,19 @@ impl<R: Read> ReadBin<Ælhometta> for R {
         }
         let i_controllers_historing = self.read_bin()?;
 
-        let introspection = match file_format_version.as_ref() {
-            "000017" | "000018" | FORMAT_VERSION => self.read_bin()?,
-            _ => false
+        let mut commandswitch = u128::MAX;
+        match file_format_version.as_ref() {
+            FORMAT_VERSION => {
+                commandswitch = self.read_bin()?;
+            },
+            "00001A" | "000019" | "000018" | "000017" => {
+                let introspection: bool = self.read_bin()?;
+                if !introspection {
+                    commandswitch ^= 1 << Command::GetExecFromOptuid.to_u8().unwrap_or(0);
+                    commandswitch ^= 1 << Command::SetOptuidFromExec.to_u8().unwrap_or(0);
+                }
+            },
+            _ => {}
         };
 
         let l: usize = self.read_bin()?;
@@ -607,17 +633,17 @@ impl<R: Read> ReadBin<Ælhometta> for R {
         let age = self.read_bin()?;
 
         let spaces_count = match file_format_version.as_ref() {
-            "000018" | FORMAT_VERSION => self.read_bin()?,
+            FORMAT_VERSION | "00001A" | "000019" | "000018" => self.read_bin()?,
             _ => 0
         };
 
         let branches_main_count = match file_format_version.as_ref() {
-            "000018" | FORMAT_VERSION => self.read_bin()?,
+            FORMAT_VERSION | "00001A" | "000019" | "000018" => self.read_bin()?,
             _ => 0
         };
 
         let branches_alt_count = match file_format_version.as_ref() {
-            "000018" | FORMAT_VERSION => self.read_bin()?,
+            FORMAT_VERSION | "00001A" | "000019" | "000018" => self.read_bin()?,
             _ => 0
         };
 
@@ -630,7 +656,7 @@ impl<R: Read> ReadBin<Ælhometta> for R {
         }
 
         let constructions_count = match file_format_version.as_ref() {
-            "000018" | FORMAT_VERSION => {
+            FORMAT_VERSION | "00001A" | "000019" | "000018" => {
                 let l: usize = self.read_bin()?;
                 let mut cons_count = HashMap::with_capacity(l);
                 for _ in 0..l {
@@ -676,6 +702,16 @@ impl<R: Read> ReadBin<Ælhometta> for R {
             whitelist.insert(self.read_bin()?);
         }
 
+        let in_permitted_before_num = match file_format_version.as_ref() {
+            FORMAT_VERSION | "00001A" => self.read_bin()?,
+            _ => 0
+        };
+
+        let in_attempted_before_num = match file_format_version.as_ref() {
+            FORMAT_VERSION | "00001A" => self.read_bin()?,
+            _ => 0
+        };
+
         let l: usize = self.read_bin()?;
         let mut output_mappings = Vec::<IntegersFileMapping>::with_capacity(l);
         for _ in 0..l {
@@ -705,7 +741,7 @@ impl<R: Read> ReadBin<Ælhometta> for R {
             controllers,
             controllers_historing,
             i_controllers_historing,
-            introspection,
+            commandswitch,
             ether_optuids,
             ether_integers,
             age,
@@ -730,6 +766,8 @@ impl<R: Read> ReadBin<Ælhometta> for R {
             exposed,
             other_peers,
             whitelist,
+            in_permitted_before_num,
+            in_attempted_before_num,
             output_mappings,
             input_mappings,
 

@@ -55,7 +55,7 @@ impl Commander {
                 Ok(nuid) => {
                     match æh.node(&nuid) {
                         Some(node) => {
-                            println!("{}{}", format!("{:16}", "Content").dark_yellow(), format!("{:?}", Content::ot_bits(node.b_content())).yellow());
+                            println!("{}{}{}", format!("{:16}", "Content").dark_yellow(), format!("{:4}", format!("{:02X}", node.b_content())).blue(), format!("{:?}", Content::ot_bits(node.b_content())).yellow());
                             println!("{}{}", format!("{:16}", "Next").dark_magenta(), Optuid::ot_bits(node.b_next()).hexly().magenta());
                             println!("{}{}", format!("{:16}", "AltNext").dark_magenta(), Optuid::ot_bits(node.b_altnext()).hexly().magenta());
                             Ok(())

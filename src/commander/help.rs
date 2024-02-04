@@ -83,8 +83,8 @@ impl Commander {
                         "Show statistics on given topic"),
                     ("cleanse",
                         "Remove all nodes and controllers"),
-                    ("introspection",
-                        "Show or set switch allowing more access to an exec pointer"),
+                    ("commsw | commandswitch",
+                        "Show or set per-command switches that NOP them"),
                     ("changelim",
                         "Change maximum number of chains"),
                     ("p | peer",
@@ -181,10 +181,10 @@ impl Commander {
             },
 
             "rand" | "random" => {
-                println!("{}{}{}", format!("{:32}", "random <entity_type>").dark_grey().bold(), "Show identifier of random entity of ".dark_grey(), "entity_type".dark_grey().italic());
-                println!("{:32}{}{}", "", "entity_type".dark_grey().italic(), " : one of the following (case-insensitive):".dark_grey());
-                println!("{:40}{}{}", "", "ctrl".dark_grey().italic(), " — controller".dark_grey());
-                println!("{:40}{}{}", "", "node".dark_grey().italic(), " — node".dark_grey());
+                println!("{}{}", format!("{:32}", "random ctrl").dark_grey().bold(), "Show identifier of random controller".dark_grey());
+                println!("{}{}", format!("{:32}", "random node").dark_grey().bold(), "Show identifier of random node".dark_grey());
+                println!("{}{}{}", format!("{:32}", "random node <bcont>").dark_grey().bold(), "Show identifier of random node among those whose byte content is ".dark_grey(), "bcont".dark_grey().italic());
+                println!("{:40}{}{}", "", "bcont".dark_grey().italic(), " : unsigned 8-bit integer in hexadecimal (case-insensitive)".dark_grey());
             },
 
             "stat" | "statistics" => {
@@ -200,8 +200,10 @@ impl Commander {
                 println!("{}{}", format!("{:32}", "cleanse").dark_grey().bold(), "Reset by removing all nodes and controllers".dark_grey());
             },
 
-            "introspection" => {
-                println!("{}{}", format!("{:32}", "introspection [false|true]").dark_grey().bold(), "Show or set switch that unlocks GetExecFromOptuid and SetOptuidFromExec commands".dark_grey());
+            "commsw" | "commandswitch" => {
+                println!("{}{}", format!("{:32}", "commandswitch").dark_grey().bold(), "Show all switch-per-command-s that, if 'false', NOP them".dark_grey());
+                println!("{}{}{}", format!("{:32}", "commandswitch <cind>").dark_grey().bold(), "Invert NOPping of command with index ".dark_grey(), "cind".dark_grey().italic());
+                println!("{:32}{}{}", "", "cind".dark_grey().italic(), " : 0–127 in hexadecimal (case-insensitive). Too large indices are not used, show all to check".dark_grey());
             },
 
             "changelim" => {
@@ -210,9 +212,9 @@ impl Commander {
             },
 
             "p" | "peer" => {
+                println!("{}{}", format!("{:40}", "peer").dark_grey().bold(), "Show peer config and state".dark_grey());
                 println!("{}{}{}{}", format!("{:40}", "peer <subcommand> [<parameters>]").dark_grey().bold(), "Execute ".dark_grey(), "subcommand".dark_grey().italic(), " related to peer config".dark_grey());
                 println!("{}", "Available subcommands (E-/E+ requires to execute before/after exposition):".dark_grey());
-                println!("{:5}{}{}", "", format!("{:35}", "info").dark_grey().bold(), "Show peer config and state".dark_grey());
                 println!("{:5}{}{}{}{}", "", format!("{:35}", "share size <size>").dark_grey().bold(), "Set number of shared integer channels to ".dark_grey(), "size".dark_grey().italic(), ", starting from 0th".dark_grey());
                 println!("{:40}{}{}", "", "size".dark_grey().italic(), " : unsigned integer in decimal, default is 0 - empty (not absent) share".dark_grey());
                 println!("{:5}{}{}{}", "", format!("{:35}", "share interval <interval>").dark_grey().bold(), "Set interval between updating shared data to ".dark_grey(), "interval".dark_grey().italic());
@@ -229,11 +231,11 @@ impl Commander {
                 println!("{:40}{}{}", "", "host".dark_grey().italic(), format!(" : IP address, default is '{}'", DEF_TOR_PROXY_HOST).dark_grey());
                 println!("{:5}{}{}", "", format!("{:35}", "expose").dark_grey().bold(), "Start network activity of this peer. E-".dark_grey());
                 println!("{:5}{}{}", "", format!("{:35}", "repose").dark_grey().bold(), "Cease network activity of this peer. E+".dark_grey());
-                println!("{:5}{}{}{}{}{}{}{}{}", "", format!("{:35}", "connect <publickey> <onion> <port>").dark_grey().bold(), "Connect to other peer with ".dark_grey(), "publickey".dark_grey().italic(), " at ".dark_grey(), "onion".dark_grey().italic(), ".onion:".dark_grey(), "port".dark_grey().italic(), ". E+".dark_grey());
+                println!("{:5}{}{}{}{}{}{}{}", "", format!("{:35}", "connect <publickey> <onion> <port>").dark_grey().bold(), "Connect to other peer with ".dark_grey(), "publickey".dark_grey().italic(), " at ".dark_grey(), "onion".dark_grey().italic(), ".onion:".dark_grey(), "port".dark_grey().italic());
                 println!("{:40}{}{}", "", "publickey".dark_grey().italic(), " : 40-character CURVE public key in Z85 encoding".dark_grey());
                 println!("{:40}{}{}", "", "onion".dark_grey().italic(), " : 56-character onion address (without '.onion')".dark_grey());
                 println!("{:40}{}{}", "", "port".dark_grey().italic(), " : unsigned integer from 0–65535 in decimal".dark_grey());
-                println!("{:5}{}{}{}{}", "", format!("{:35}", "disconnect <publickey>").dark_grey().bold(), "Disconnect from other peer with ".dark_grey(), "publickey".dark_grey().italic(), ". E+ and after connection initiated".dark_grey());
+                println!("{:5}{}{}{}", "", format!("{:35}", "disconnect <publickey>").dark_grey().bold(), "Disconnect from other peer with ".dark_grey(), "publickey".dark_grey().italic());
                 println!("{:40}{}{}", "", "publickey".dark_grey().italic(), " : 40-character CURVE public key in Z85 encoding".dark_grey());
                 println!("{:5}{}{}{}{}{}{}{}{}", "", format!("{:35}", "ether <publickey> <start> [length]").dark_grey().bold(), "Show Integer ether of other peer with ".dark_grey(), "publickey".dark_grey().italic(), ": ".dark_grey(), "length".dark_grey().italic(), " channels, starting from ".dark_grey(), "start".dark_grey().italic(), "-th".dark_grey());
                 println!("{:40}{}{}", "", "publickey".dark_grey().italic(), " : 40-character CURVE public key in Z85 encoding".dark_grey());

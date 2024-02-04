@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "aelhometta"
-version = "1.0.2"
+version = "1.0.4"
 dependencies = [
  "chrono",
  "crossterm",
@@ -117,9 +117,9 @@ dependencies = [
 
 [[package]]
 name = "emyzelium"
-version = "0.9.8"
+version = "0.9.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e53d75fb884e63160de5c7c4e3d77a95bd87f18f2df2dac1dfb06e728bf8cc1"
+checksum = "0c8a9072db249948a184b8aa7515a01cc122de34da318579d6588cd5db83d5d8"
 dependencies = [
  "getrandom",
 ]

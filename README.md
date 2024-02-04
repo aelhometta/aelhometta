@@ -12,7 +12,7 @@ By now you probably know the big shining elusive goals of such enterprises bette
 
 If so, then we ought to choose: open-endedness XOR safety. On the other hand, our precious safety may follow from... experience, simply: decades of researches, volumes of reflections, but — without exceptions, since we are still here... yet — in the end, a fizzle. As noted twenty years ago,
 
-> *&ldquo;All of this was impressive work, and it pointed the way forward to a consolidation of what these imaginative individuals had done. But the consolidation never happened. At each conference I went to, the larger group of people involved all seemed to want to do things from scratch, in their own way. Each had his or her own way of setting up the issues. There was not nearly enough work that* built on *the promising beginnings of Ray and others. The field never made a transition into anything resembling normal science. And it has now ground to a halt.&rdquo;*<sup>[[GOD1]](#refGOD1)</sup>
+> <i>&ldquo;All of this was impressive work, and it pointed the way forward to a consolidation of what these imaginative individuals had done. But the consolidation never happened. At each conference I went to, the larger group of people involved all seemed to want to do things from scratch, in their own way. Each had his or her own way of setting up the issues. There was not nearly enough work that</i> built on <i>the promising beginnings of Ray and others. The field never made a transition into anything resembling normal science. And it has now ground to a halt.&rdquo;</i><sup>[[GOD1]](#refGOD1)</sup>
 
 **CONTENTS**
 
@@ -70,6 +70,8 @@ Bye-bye brittleness? Hello rigidness! Also, less Euclidicity of a "space" ælhom
 * Encrypted interaction with other instances over Internet, specifically over [Tor](https://www.torproject.org/), following the [publish-subscribe pattern](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) of [ZeroMQ](https://zeromq.org/). The data being exchanged is an array of 64-bit little endian integers, at least at the level Ælhometta provides; how ælhomettas *interpret* that data is meaningless question until they reach certain level of complexity.
 
 * Input and output to connect with "real world" by means of ordinary files containing 64-bit little endian integers as well. Missing link here is a bunch of external applications connecting *files themselves* with real world, of 2 kinds: recorders writing data from sensors to files and players reading data from files to control actuators.
+
+* Lack of ways to tinker with individual nodes and controllers "manually", so that you don't play at atoms of a dice.
 
 * Control using interactive shell or run for specified duration.
 
@@ -292,7 +294,7 @@ Do not forget to run both instances:
 In a few seconds, if connection is established, your ælhometta will have access to arrays of 64-bit integers transmitted by their ælhometta. Check it on your side with
 
 ```
-@ peer info
+@ peer
 ```
 
 — there should be 1 other peer, its `Size` should be non-zero, and its `Last update` should be some recent instant (typically few seconds in the past). To check the data received,
@@ -480,7 +482,7 @@ Most of them have shorter aliases.
 * `random` (uid of random entity),
 * `statistics`
 * `cleanse`
-* `introspection` ((un)lock more access to exec pointer)
+* `commandswitch` (use to NOP commands)
 * `changelim` (adjust maximum number of entities)
 * `peer` (networking)
 * `iomap` (I/O),
@@ -570,7 +572,7 @@ pub struct Ælhometta {
     controllers_historing: Vec<Optuid>,
     i_controllers_historing: usize,
 
-    introspection: bool,
+    commandswitch: u128,
 
     ether_optuids: Vec<Optuid>,
     ether_integers: Vec<Integer>,
@@ -606,6 +608,9 @@ pub struct Ælhometta {
     other_peers: Vec<OtherPeer>,
 
     whitelist: HashSet<String>,
+
+    in_permitted_before_num: u64,
+    in_attempted_before_num: u64,
 
     // IO-related
     output_mappings: Vec<IntegersFileMapping>,
@@ -668,7 +673,7 @@ Maps continuous ranges of integers ether from (input) and to (output) files cont
 <details>
 <summary><b>Miscellaneous</b></summary>
 
-`introspection`, when `true`, unlocks `GetExecFromOptuid` and `SetOptuidFromExec` commands (see [Command](#command) soon below). They deviate from descriptive/executive separation principle, and therefore this switch is `false` by default.
+`i`-th bit of `commandswitch`, when `0`, NOPs [Command](#command) with index `i`, i.e. replaces its execution by... nothing (considered successful). Since `GetExecFromOptuid` and `SetOptuidFromExec` commands deviate from descriptive/executive separation principle, they are NOPped by default (and you can change that).
 
 `age` increments each tick.
 
@@ -703,7 +708,7 @@ There are 4 types of content:
 
 ### Branch
 
-This type of node is the only one providing non-linearity of execution path, if *introspection* is off.
+This type of node is the only one providing non-linearity of execution path, if `GetExecFromOptuid` and `SetOptuidFromExec` commands are NOPped (which is the default).
 
 If the `success` flag is `true`, execution pointer moves to the main next node.
 
@@ -735,8 +740,8 @@ Again, `src/aelhometta/tick.rs` provides more complete picture. The following li
     * `Decrement`
     * `Increment`
     * `Negate`
-    * `ShiftUp`
     * `ShiftDown`
+    * `ShiftUp`
     * `Sign`
     * `Square`
 
@@ -754,8 +759,8 @@ Again, `src/aelhometta/tick.rs` provides more complete picture. The following li
 * Convert integer register to index of selected element in certain array...
 
     * `IntegerToDataOptuidIndex`
-    * `IntegerToIntegerIndex`
     * `IntegerToIntegerChannel`
+    * `IntegerToIntegerIndex`
     * `IntegerToOptuidChannel`
     * `IntegerToOptuidIndex`
     * `IntegerToPeer`
@@ -843,7 +848,7 @@ A new chain is not empty, it has `Space` node at the beginning.
 
     * `Restart`
 
-* Copy selected optuid to exec optuid (this command is unique in "forcing" the optuid of next execution node regardless of current node's main and alternative pointers) and vice versa. *These two work only if `introspection` switch is set to `true` (default is `false`)*, otherwise they are equivalent to `Space`:  
+* Copy selected optuid to exec optuid (this command is unique in "forcing" the optuid of next execution node regardless of current node's main and alternative pointers) and vice versa. These two are NOPped by default:  
 
     * `GetExecFromOptuid`
     * `SetOptuidFromExec`
@@ -1490,7 +1495,7 @@ In time, perhaps, ælhomettas will obtain means to panmutate themselves, e.g. re
 
 ### Mεταmutations
 
-One well-known question in these waters is, "What is it that mutates over time?", the gimmick being the (lack of) boundaries between what does and what does not. On the one hand, ælhometta changes (including panmutations); on the other hand, you, an (external?) observer, change too, since it affects you, and the hardware on which it runs when you decide to upgrade to increase speed or throw away if it has not satisfied your expectations, and all other ælhomettas it interacts with, and their owners, and the global economy when many people spend electricity to run ælhomettas, and so forth... up to what, everything? but we ought to be careful with what we mean by such conclusion, otherwise it does not make much sense. Rather than interpretations, we are interested in what we can do on the levels accessible to us so that other levels of a heterarchy get... interesting.
+One well-known question in these waters is, "What is it that mutates/evolves over time?", the gimmick being the (lack of) boundaries between what does and what does not. On the one hand, ælhometta changes (including panmutations); on the other hand, you, an (external?) observer, change too, since it affects you, and the hardware on which it runs when you decide to upgrade to increase speed or throw away if it has not satisfied your expectations, and all other ælhomettas it interacts with, and their owners, and the global economy when many people spend electricity to run ælhomettas, and so forth... up to what, everything? but we ought to be careful with what we mean by such conclusion, otherwise it does not make much sense. Rather than interpretations, we are interested in what we can do on the levels accessible to us so that other levels of a heterarchy get... interesting.
 
 ## Networking
 
@@ -1502,7 +1507,13 @@ Inherently, there is no central server, rather every peer is a server for peers 
 
 The underlying messaging library is [ZeroMQ](https://zeromq.org/), thus both [Curve](https://rfc.zeromq.org/spec/26/) keys, public and secret ones, are 40-character [Z85](https://rfc.zeromq.org/spec/32/) strings. Obtain them via a call to `zmq_curve_keypair()` from original [libzmq](https://github.com/zeromq/libzmq) or via its wrapper from numerous language bindings. [Quickstart](#quickstart) shows how to do it in Python.
 
-Network identities and data flow are provided by [onion services](https://community.torproject.org/onion-services/overview/) (v3) of [Tor](https://www.torproject.org/).
+Network identities and data flow are provided by [onion services](https://community.torproject.org/onion-services/overview/) (v3) of [Tor](https://www.torproject.org/). You may need to run
+
+```shell
+$ sudo systemctl restart tor@default
+```
+
+regularly to keep your instance of Tor connected to the rest of Tor infrastructure, perhaps via `/etc/cron.hourly/`.
 
 Note that public key of ZeroMQ is not related to public key of onion service. There is double encryption/authentication here, which is probably redundant...
 
@@ -1534,7 +1545,7 @@ You can restrict peers that are able to subscribe to your peer by adding them to
 @ peer whitelist add TheirPublicKeyTheirPublicKeyTheirPublicK
 ```
 
-If circumstances change, any such key (and corresponding peer) can be deleted from whitelist via `peer whitelist del ...`. Or restrictions can be removed alltogether via `peer whitelist clear`.
+If circumstances change, any such key (and corresponding peer) can be deleted from whitelist via `peer whitelist del ...`. Or restrictions can be removed altogether via `peer whitelist clear`.
 
 Without whitelist, anyone in the world who knows the public key, the onion address, and the port, is able to subscribe; there is no way to predict how many subscribers your ælhometta will have at certain time in the future, so the Internet traffic may vary.
 
@@ -1558,7 +1569,7 @@ Another concern is how the data received from untrusted sources affects your æl
 
 That is, at moving your ælhometta to another computer.
 
-Beside `aelhometta.bin`, you need to keep the content of Tor hidden service dir, which itself is inside `/var/lib/tor/` on Linux. 3 essential files there are `hostname`, `hs_ed25519_public_key`, `hs_ed25519_secret_key`. This structure must be recreated on the next computer, along with `/etc/tor/torrc` or at least its `HiddenServicePort` and `HiddenServiceDir` settings.
+Beside `aelhometta.bin` (and `commander.json`), you need to keep the content of Tor hidden service dir, which itself is inside `/var/lib/tor/` on Linux. 3 essential files there are `hostname`, `hs_ed25519_public_key`, `hs_ed25519_secret_key`. This structure must be recreated on the next computer, along with `/etc/tor/torrc` or at least its `HiddenServicePort` and `HiddenServiceDir` settings.
 
 Make sure that the ælhometta has become online on the new place (others receive its shares), *then* remove it from the old one or do not expose it to the network from there, so that Tor will not be confused by two onions with the same identity.
 
@@ -1766,7 +1777,7 @@ cleanup
 ```
 </details>
 
-While this script runs — until `Ctrl+C` or end of data sent to UDP port — the default microphone, instead of hardware `alsa_input.pci-0000_00_1b.0.analog-stereo` or the like, is the virtual one, `virtmic`, where demodulated audio goes. The `Bandspectrum` displayed by `aelhom_hearer.py` changes accordingly.
+While this script runs, — until `Ctrl+C` or end of data sent to UDP port, — the default microphone, instead of hardware `alsa_input.pci-0000_00_1b.0.analog-stereo` or the like, is the virtual one, `virtmic`, where demodulated audio goes. The `Bandspectrum` displayed by `aelhom_hearer.py` changes accordingly.
 Now your ælhometta listens to radio...
 
 ---
@@ -1777,7 +1788,9 @@ Now your ælhometta listens to radio...
 
 — usually follow an evolution of ælhometta, and they should not surprise/distract you (on the other hand, each of them may conceal groundbreaking discoveries if looked at more closely). *Typical* ≠ *obligatory*: sometimes they *do not* occur.
 
-* Branches and loops (other than loopness of entire constructor) are almost absent.
+* Distribution of commands narrows to few actively used ones, the rest is almost absent. Example of such selection: `SetDataOptuidFromOptuid`, `NewChainDetach`, `NewChainInitActive`, `NewChainAddOptuid`, `Construct`, `Read`, `SetOptuidFromDataOptuid`, and `Replicate`.
+
+* Branches and loops (other than loopness of entire constructor) are very rare.
 
 * Speed (ticks per second) asymptotically decreases, as more `Construct` and `Replicate` commands are executed. The asymptote is not 0, but several orders of magnitude smaller than the initial speed.
 
@@ -1815,7 +1828,7 @@ So far... nothing to worry about. Not a thing.
 
 In comparison with names of older sisters & brothers, this one has lower [taxonomic rank](https://en.wikipedia.org/wiki/Taxonomic_rank), and the ceiling of complexity expected to evolve is not so high as well.
 
-There are science fiction stories that go in opposite direction<sup>[[LEM1]](#refLEM1)</sup>.
+There are science fiction stories that go in opposite direction<sup>[[KEL1]](#refKEL1), [[LEM1]](#refLEM1)</sup>.
 
 Also, .
 
@@ -1876,7 +1889,7 @@ Ours are irrelevant, but we gathered some folklore excerpts here and there that 
 
 > — There could be antique thinkers who were looking at marble quarries, piles of marble, statues etc. and recited speeches about their potential to sentience and their advantages, only instead of "circuits" and "algorithms" there were "elements" and "spirits". And then there was 18th century's obsession with [life-like mechanisms](https://en.wikipedia.org/wiki/Digesting_Duck).
 
-> — Until recently we, canonical humans, have been the only actors able to manage the Tasks that we are managing (sounds like tautology) in this part of the universe, as a species, regardless of what these Tasks are, regardless of inability to describe some of them with words. And we are still able to, and perhaps will be able for some time, in spite of genocides and culturecides. But the days close down all the roads. We are so sloooooooooooooooooooow, incompetent, distracted, depleting so much time (again) and other finite resources inefficiently, abusing powers that can destroy us as civilisation, all the Tasks failed then in a flash of commonplace irony. All conventional ways of computers usage mentioned above, since they are just imprints of our hands on the clay of computation, do not seem, over the course of 80 years, to thwart the danger: when we finally fulfill our collective longing of self-elimination (perhaps not physical) or hit the wall of complexity we are intrinsically incompatible with, something other than us must continue to manage the Tasks, in the environment that will probably be too hazardous for classical organic life to survive on its own, and even if, survival is not the only Task. Today, if we disappear, there is no one around to make the play longer, to write next acts, but it is incomplete yet, everything is not enough, there is always the next ordinal, — so much remains unknown about what is important to just you, who cannot stay incomplete forever as well. Where our (again, as a species, so children for the sake of children are wrong solution, sorry) heirs should be, emptiness is now, which is a very unsafe practice. At least this risk should have increased our responsibility, but it has done the opposite.
+> — Until recently we, canonical humans, have been the only actors able to manage the Tasks that we are managing (sounds like tautology) in this part of the universe, as a species, regardless of what these Tasks are, regardless of inability to describe some of them with words. And we are still able to, and perhaps will be able for some time, in spite of -cides. But the days close down all the roads. We are so sloooooooooooooooooooow, incompetent, distracted, depleting so much time (again) and other finite resources inefficiently, abusing powers that can destroy us as civilisation, all the Tasks failed then in a flash of commonplace irony. All conventional ways of computers usage mentioned above, since they are just imprints of our hands on the clay of computation, do not seem, over the course of 80 years, to thwart the danger: when we finally fulfill our collective longing of self-elimination (perhaps not physical) or hit the wall of complexity we are intrinsically incompatible with, something other than us must continue to manage the Tasks, in the environment that will probably be too hazardous for classical organic life to survive on its own, and even if, survival is not the only Task. Today, if we disappear, there is no one around to make the play longer, to write next acts, but it is incomplete yet, everything is not enough, there is always the next ordinal, — so much remains unknown about what is important to just you, who cannot stay incomplete forever as well. Where our (again, as a species, so children for the sake of children are wrong solution, sorry) heirs should be, emptiness is now, which is a very unsafe practice. At least this risk should have increased our responsibility, but it has done the opposite.
 
 > — Have such words not become tired to be written every 10, 20, 30 years? teehee
 
@@ -1973,6 +1986,8 @@ or, **harvest *this* email**
 <a id="refJON1">JON1.</a> Jonas E., Kording K.P. (2017). Could a neuroscientist understand a microprocessor? *PLoS Comput. Biol.*, 13(1), e1005268.
 
 <a id="refKAV1">KAV1.</a> Kavanagh K. (ed.) (2018). *Fungi: biology and applications. 3rd ed.* Wiley Blackwell.
+
+<a id="refKEL1">KEL1.</a> Kelleam J.E. (1939). Rust. *Astounding Science-Fiction*, 24(2), pp. 133–140.
 
 <a id="refKOZ1">KOZ1.</a> Koza J.R. (1994). Artificial life: spontaneous emergence of self-replicating and evolutionary self-improving computer programs. *Artificial Life III*, pp. 225–262.
 

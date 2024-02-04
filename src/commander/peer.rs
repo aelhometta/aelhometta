@@ -45,36 +45,6 @@ impl Commander {
         if paramstr.len() > 0 {
             let command = paramstr[0].to_lowercase();
             match command.as_str() {
-                "info" => {
-                    println!("{}{}", format!("{:24}", "Share size").dark_blue(), format!("{}", æh.share_size()).blue());
-                    println!("{}{}", format!("{:24}", "Share interval (μs)").dark_green(), format!("{}", æh.share_interval()).green());
-                    println!("{}{}", format!("{:24}", "Last share").dark_green(), format!("{}.{:03} UTC", NaiveDateTime::from_timestamp_micros(æh.ut_last_share()).unwrap_or_default().format("%Y.%m.%d %a %H:%M:%S"), (æh.ut_last_share() / 1000) % 1000).green());
-                    println!("{}{}", format!("{:24}", "Secret key").dark_red(), format!("{}", & æh.secretkey()).red());
-                    println!("{}{}", format!("{:24}", "Port").dark_blue(), format!("{}", æh.port()).blue());
-                    println!("{}{}", format!("{:24}", "Tor proxy port").dark_blue(), format!("{}", æh.torproxy_port()).blue());
-                    println!("{}{}", format!("{:24}", "Tor proxy host").dark_magenta(), format!("{}", & æh.torproxy_host()).magenta());
-                    println!("{}{}", format!("{:24}", "Exposed").dark_yellow(), format!("{}", æh.exposed()).yellow());
-                    print!("{}", format!("{:24}", "Incoming connections").dark_blue());
-                    match æh.in_connections_num() {
-                        Some(num) => {
-                            println!("{}", format!("{}", num).blue());
-                        },
-                        None => {
-                            println!("{}", "Not exposed".dark_yellow().bold());
-                        }
-                    }
-                    println!("{:8}{}", " ", format!("Other peers ({})", æh.other_peers().len()).dark_grey());
-                    for (i, op) in æh.other_peers().iter().enumerate() {
-                        println!("{:4}{}", " ", format!("Peer {}", 1 + i).dark_grey());
-                        println!("{}{}", format!("{:24}", "Public key").dark_yellow(), format!("{}", & op.publickey()).yellow());
-                        println!("{}{}", format!("{:24}", "Onion").dark_magenta(), format!("{}", & op.onion()).magenta());
-                        println!("{}{}", format!("{:24}", "Port").dark_blue(), format!("{}", op.port()).blue());
-                        println!("{}{}", format!("{:24}", "Share size").dark_blue(), format!("{}", op.ether_integers().len()).blue());
-                        println!("{}{}", format!("{:24}", "Last update").dark_green(), format!("{}.{:03} UTC", NaiveDateTime::from_timestamp_micros(op.ut_last_update()).unwrap_or_default().format("%Y.%m.%d %a %H:%M:%S"), (op.ut_last_update() / 1000) % 1000).green());
-                    }
-                    Ok(())
-                },
-
                 "share" => {
                     if paramstr.len() >= 2 {
                         let setting = paramstr[1].to_lowercase();
@@ -327,7 +297,35 @@ impl Commander {
             }
 
         } else {
-            Err(String::from("Subcommand not specified"))
+            println!("{}{}", format!("{:24}", "Share size").dark_blue(), format!("{}", æh.share_size()).blue());
+            println!("{}{}", format!("{:24}", "Share interval (μs)").dark_green(), format!("{}", æh.share_interval()).green());
+            println!("{}{}", format!("{:24}", "Last share").dark_green(), format!("{}.{:03} UTC", NaiveDateTime::from_timestamp_micros(æh.ut_last_share()).unwrap_or_default().format("%Y.%m.%d %a %H:%M:%S"), (æh.ut_last_share() / 1000) % 1000).green());
+            println!("{}{}", format!("{:24}", "Secret key").dark_red(), format!("{}", & æh.secretkey()).red());
+            println!("{}{}", format!("{:24}", "Port").dark_blue(), format!("{}", æh.port()).blue());
+            println!("{}{}", format!("{:24}", "Tor proxy port").dark_blue(), format!("{}", æh.torproxy_port()).blue());
+            println!("{}{}", format!("{:24}", "Tor proxy host").dark_magenta(), format!("{}", & æh.torproxy_host()).magenta());
+            println!("{}{}", format!("{:24}", "Exposed").dark_yellow(), format!("{}", æh.exposed()).yellow());
+            print!("{}", format!("{:24}", "Incoming absorbing").dark_blue());
+            match æh.in_absorbing_num() {
+                Some(num) => {
+                    println!("{}", format!("{}", num).blue());
+                },
+                None => {
+                    println!("{}", "Not exposed".dark_yellow().bold());
+                }
+            }
+            println!("{}{}", format!("{:24}", "Incoming permitted").dark_blue(), format!("{}", æh.in_permitted_num()).blue());
+            println!("{}{}", format!("{:24}", "Incoming attempted").dark_blue(), format!("{}", æh.in_attempted_num()).blue());
+            println!("{:8}{}", " ", format!("Other peers ({})", æh.other_peers().len()).dark_grey());
+            for (i, op) in æh.other_peers().iter().enumerate() {
+                println!("{:4}{}", " ", format!("Peer {}", 1 + i).dark_grey());
+                println!("{}{}", format!("{:24}", "Public key").dark_yellow(), format!("{}", & op.publickey()).yellow());
+                println!("{}{}", format!("{:24}", "Onion").dark_magenta(), format!("{}", & op.onion()).magenta());
+                println!("{}{}", format!("{:24}", "Port").dark_blue(), format!("{}", op.port()).blue());
+                println!("{}{}", format!("{:24}", "Share size").dark_blue(), format!("{}", op.ether_integers().len()).blue());
+                println!("{}{}", format!("{:24}", "Last update").dark_green(), format!("{}.{:03} UTC", NaiveDateTime::from_timestamp_micros(op.ut_last_update()).unwrap_or_default().format("%Y.%m.%d %a %H:%M:%S"), (op.ut_last_update() / 1000) % 1000).green());
+            }
+            Ok(())
         }
     }
 

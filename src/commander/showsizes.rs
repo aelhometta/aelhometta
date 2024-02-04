@@ -31,7 +31,15 @@
 use crossterm::style::Stylize;
 
 use {
-    crate::aelhometta::Ælhometta,
+    crate::aelhometta::{
+        NUM_CTRL_OPTUIDS,
+        NUM_CTRL_DATA_OPTUIDS,
+        NUM_CTRL_INTEGERS,
+        NUM_CTRL_OPTUID_CHANNELS,
+        NUM_CTRL_INTEGER_CHANNELS,
+        NUM_INTEGER_CHANNELS,
+        NUM_OPTUID_CHANNELS
+    },
     super::{
         HISTORY_MAX_LEN,
         Commander
@@ -39,16 +47,39 @@ use {
 };
 
 impl Commander {
-    pub fn showsizes(&self, æh: &Ælhometta) -> Result<(), String> {
+    pub fn showsizes(&self) -> Result<(), String> {
+        println!("{:8}{}", " ", "Controller".dark_grey());
+
+        println!("{}{}",
+            format!("{:24}", "Optuids").dark_magenta(),
+            format!("{}", NUM_CTRL_OPTUIDS).magenta() 
+        );
+        println!("{}{}",
+            format!("{:24}", "Data optuids").dark_magenta(),
+            format!("{}", NUM_CTRL_DATA_OPTUIDS).magenta() 
+        );
+        println!("{}{}",
+            format!("{:24}", "Integers").dark_blue(),
+            format!("{}", NUM_CTRL_INTEGERS).blue() 
+        );
+        println!("{}{}",
+            format!("{:24}", "Optuid channels").dark_magenta(),
+            format!("{}", NUM_CTRL_OPTUID_CHANNELS).magenta() 
+        );
+        println!("{}{}",
+            format!("{:24}", "Integer channels").dark_blue(),
+            format!("{}", NUM_CTRL_INTEGER_CHANNELS).blue()
+        );
+
         println!("{:8}{}", " ", "Ælhometta".dark_grey());
 
         println!("{}{}",
             format!("{:24}", "Optuid channels").dark_magenta(),
-            format!("{}", æh.ether_optuids().len()).magenta() 
+            format!("{}", NUM_OPTUID_CHANNELS).magenta() 
         );
         println!("{}{}",
             format!("{:24}", "Integer channels").dark_blue(),
-            format!("{}", æh.ether_integers().len()).blue()
+            format!("{}", NUM_INTEGER_CHANNELS).blue()
         );
 
         println!("{:8}{}", " ", "Commander".dark_grey());

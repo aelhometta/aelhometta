@@ -48,11 +48,11 @@ mod ancestors;
 mod backtrace;
 mod changelim;
 mod cleanse;
+mod commandswitch;
 mod ether;
 mod glitch;
 mod help;
 mod history;
-mod introspection;
 mod iomap;
 mod peer;
 mod prevnodes;
@@ -277,12 +277,12 @@ impl Commander {
 }
 
 impl<S: ToString> ParseHex for S {
-    fn parse_hex<N>(&self) -> Result<Uid, String> {
+    fn parse_hex<N>(&self) -> Result<u32, String> {
         let chars = self.to_string().chars().collect::<Vec<char>>();
         let mut n = 0;
         for c in chars {
             n = (n << 4) | match c.to_digit(0x10) {
-                Some(d) => d as Uid,
+                Some(d) => d as u32,
                 None => {
                     return Err(format!("'{}' is not a hexadecimal char", c))
                 }

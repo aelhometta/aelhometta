@@ -35,12 +35,16 @@ use {
         Ælhometta,
         Hexly
     },
-    super::Commander
+    super::{
+        Commander,
+        ParseErrorPrefixise,
+        ParseHex
+    }
 };
 
 impl Commander {
     pub fn random(&self, æh: &mut Ælhometta, paramstr: &[&str]) -> Result<(), String> {
-        if paramstr.len() >= 1 {
+        if paramstr.len() > 0 {
             let entitype = paramstr[0].to_lowercase();
             match entitype.as_str() {
                 "ctrl" => {
@@ -49,8 +53,23 @@ impl Commander {
                 },
 
                 "node" => {
-                    println!("{}", æh.random_node_optuid().hexly().magenta());
-                    Ok(())
+                    if paramstr.len() > 1 {
+                        match paramstr[1].parse_hex::<u8>() {
+                            Ok(b_content) => {
+                                if b_content < 0x100 {
+                                    let b_content = b_content as u8;
+                                    println!("{}", æh.random_node_with_bcontent_optuid(b_content).hexly().magenta());
+                                    Ok(())
+                                } else {
+                                    Err(String::from("Byte content must be not greater than 255"))
+                                }
+                            },
+                            Err(err) => err.prefixised("byte content")
+                        }
+                    } else {
+                        println!("{}", æh.random_node_optuid().hexly().magenta());
+                        Ok(())
+                    }                    
                 },
 
                 _ => {

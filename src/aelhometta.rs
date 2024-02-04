@@ -70,15 +70,15 @@ pub use serbin::FORMAT_VERSION;
 
 // Constants; the lesser of them, the better (arbitrariness...)?
 
-const NUM_CTRL_OPTUIDS: usize = 0x10;
-const NUM_CTRL_DATA_OPTUIDS: usize = 8;
-const NUM_CTRL_INTEGERS: usize = 0x20;
+pub const NUM_CTRL_OPTUIDS: usize = 0x10;
+pub const NUM_CTRL_DATA_OPTUIDS: usize = 8;
+pub const NUM_CTRL_INTEGERS: usize = 0x20;
 
-const NUM_OPTUID_CHANNELS: usize = 0x10000;
-const NUM_INTEGER_CHANNELS: usize = 0x100000;
+pub const NUM_OPTUID_CHANNELS: usize = 0x10000;
+pub const NUM_INTEGER_CHANNELS: usize = 0x100000;
 
-const NUM_CTRL_OPTUID_CHANNELS: usize = 0x10;
-const NUM_CTRL_INTEGER_CHANNELS: usize = 0x20;
+pub const NUM_CTRL_OPTUID_CHANNELS: usize = 0x10;
+pub const NUM_CTRL_INTEGER_CHANNELS: usize = 0x20;
 
 // Default values
 
@@ -358,7 +358,7 @@ pub struct Ælhometta {
     controllers_historing: Vec<Optuid>,
     i_controllers_historing: usize,
 
-    introspection: bool, // allow GetExecFromOptuid and SetOptuidFromExec commands
+    commandswitch: u128, // i-th bit is 0 means i-th command is NOPped. Will there always be less than 128 commands?..
 
     ether_optuids: Vec<Optuid>,
     ether_integers: Vec<Integer>,
@@ -394,6 +394,9 @@ pub struct Ælhometta {
     other_peers: Vec<OtherPeer>,
 
     whitelist: HashSet<String>,
+
+    in_permitted_before_num: u64,
+    in_attempted_before_num: u64,
 
     // IO-related
     output_mappings: Vec<IntegersFileMapping>,
@@ -810,6 +813,10 @@ impl Ælhometta {
         let rng = thread_rng();
         let max_num_chains: usize = 1 << max_num_chains_binlog;
 
+        let mut commandswitch = u128::MAX;
+        commandswitch ^= 1 << Command::GetExecFromOptuid.to_u8().unwrap_or(0);
+        commandswitch ^= 1 << Command::SetOptuidFromExec.to_u8().unwrap_or(0);
+
         Self {
             max_num_chains_binlog,
             max_num_chains,
@@ -822,7 +829,7 @@ impl Ælhometta {
             controllers: HashMap::new(),
             controllers_historing: vec![None; max_num_chains],
             i_controllers_historing: 0,
-            introspection: false,
+            commandswitch,
             ether_optuids: vec![None; NUM_OPTUID_CHANNELS],
             ether_integers: vec![0; NUM_INTEGER_CHANNELS],
             age: 0,
@@ -847,6 +854,8 @@ impl Ælhometta {
             exposed: false,
             other_peers: Vec::new(),
             whitelist: HashSet::new(),
+            in_permitted_before_num: 0,
+            in_attempted_before_num: 0,
             output_mappings: Vec::new(),
             input_mappings: Vec::new(),
 
@@ -925,6 +934,30 @@ impl Ælhometta {
         self.nodes.iter().choose(&mut self.rng).map(|(nuid, _)| *nuid)
     }
 
+    pub fn random_node_with_bcontent_optuid(&mut self, b_content: u8) -> Optuid {
+        let mut n: usize = 0;
+        for (_, node) in & self.nodes {
+            if node.b_content == b_content {
+                n += 1;
+            }
+        }
+        if n > 0 {
+            let i = self.rng.gen_range(0..n);
+            let mut j: usize = 0;
+            for (uid, node) in & self.nodes {
+                if node.b_content == b_content {
+                    if j == i {
+                        return Some(*uid);
+                    }
+                    j += 1;
+                }
+            }
+            None // should be unreachable
+        } else {
+            None
+        }
+    }
+
     pub fn node(&self, nuid: &Uid) -> Option<&Node> {
         self.nodes.get(nuid)
     }
@@ -954,12 +987,12 @@ impl Ælhometta {
         self.controllers.get(cuid)
     }
 
-    pub fn introspection(&self) -> bool {
-        self.introspection
+    pub fn commandswitch(&self, i: u8) -> bool {
+        (self.commandswitch >> i) & 1 != 0
     }
 
-    pub fn set_introspection(&mut self, b: bool) {
-        self.introspection = b;
+    pub fn change_commandswitch(&mut self, i: u8) {
+        self.commandswitch ^= 1 << i
     }
 
     pub fn ether_optuids(&self) -> & Vec<Optuid> {
@@ -1038,8 +1071,22 @@ impl Ælhometta {
         self.exposed
     }
 
-    pub fn in_connections_num(&self) -> Option<usize> {
-        self.efunguz.as_ref().map(|efunguz| efunguz.in_connections_num())
+    pub fn in_absorbing_num(&self) -> Option<u64> {
+        self.efunguz.as_ref().map(|efunguz| efunguz.in_absorbing_num())
+    }
+
+    pub fn in_permitted_num(&self) -> u64 {
+        self.in_permitted_before_num + match self.efunguz {
+            Some(ref efunguz) => efunguz.in_permitted_num(),
+            None => 0
+        }
+    }
+
+    pub fn in_attempted_num(&self) -> u64 {
+        self.in_attempted_before_num + match self.efunguz {
+            Some(ref efunguz) => efunguz.in_attempted_num(),
+            None => 0
+        }
     }
 
     pub fn other_peers(&self) -> & Vec<OtherPeer> {
@@ -1065,7 +1112,9 @@ impl Ælhometta {
         self.controllers_historing = vec![None; self.max_num_chains];
         self.i_controllers_historing = 0;
 
-        self.introspection = false;
+        self.commandswitch = u128::MAX;
+        self.commandswitch ^= 1 << Command::GetExecFromOptuid.to_u8().unwrap_or(0);
+        self.commandswitch ^= 1 << Command::SetOptuidFromExec.to_u8().unwrap_or(0);
 
         self.ether_optuids = vec![None; NUM_OPTUID_CHANNELS];
         self.ether_integers = vec![0; NUM_INTEGER_CHANNELS];
@@ -1102,6 +1151,9 @@ impl Ælhometta {
         self.other_peers.clear();
 
         self.whitelist.clear();
+        
+        self.in_permitted_before_num = 0;
+        self.in_attempted_before_num = 0;
 
         self.output_mappings.clear();
         self.input_mappings.clear();

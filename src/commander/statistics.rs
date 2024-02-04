@@ -39,9 +39,12 @@ use std::{
 };
 
 use {
-    crate::aelhometta::{
-        Ælhometta,
-        CONTENTS
+    crate::{
+        aelhometta::{
+            Ælhometta,
+            CONTENTS
+        },
+        serbin::ToBits
     },
     super::Commander
 };
@@ -86,7 +89,8 @@ impl Commander {
     
                     for content in CONTENTS {
                         let count = * cont_stats.get(&content).unwrap_or(&0);
-                        println!("{}{}{}",
+                        println!("{}{}{}{}",
+                            format!("{:<4}", format!("{:02X}", content.to_bits())).blue(),
                             format!("{:<40}", format!("{:?}", content)).yellow(),
                             format!("{:>12}", count).dark_yellow(),
                             format!("{:>11.3} %", ((count) as f64) * 100.0 / (æh.num_nodes().max(1) as f64)).dark_blue()

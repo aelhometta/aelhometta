@@ -228,11 +228,11 @@ impl Commander {
                                 }
                             },
 
-                            "introspection" => {
-                                match self.introspection(æh, & tokens[1..]) {
+                            "commsw" | "commandswitch" => {
+                                match self.commandswitch(æh, & tokens[1..]) {
                                     Ok(_) => {},
                                     Err(err) => {
-                                        println!("{}", format!("Error configuring introspection: {}", &err).red().bold());
+                                        println!("{}", format!("Error showing or changing commandswitches: {}", &err).red().bold());
                                     }
                                 }
                             },
@@ -265,7 +265,7 @@ impl Commander {
                             },
 
                             "showsizes" => {
-                                match self.showsizes(æh) {
+                                match self.showsizes() {
                                     Ok(_) => {},
                                     Err(err) => {
                                         println!("{}", format!("Error showing sizes: {}", &err).red().bold());

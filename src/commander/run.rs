@@ -53,6 +53,8 @@ use crossterm::{
     ExecutableCommand
 };
 
+use num_traits::ToPrimitive;
+
 use std::{
     collections::{BTreeMap, VecDeque},
     io::{
@@ -123,7 +125,7 @@ fn clear_drawn_frequencies(comm_count_len: usize) -> Result<(), String> {
     Ok(())
 }
 
-fn draw_frequencies(comm_count: &Vec<(Command, u128)>, cons_count: &Vec<(Construction, u128)>, branches_main_count: u128, branches_alt_count: u128, i_sel_comm: usize, i_sel_cons: usize, settings: &Settings) -> Result<(), String> {
+fn draw_frequencies(comm_count: &Vec<(Command, u128)>, cons_count: &Vec<(Construction, u128)>, branches_main_count: u128, branches_alt_count: u128, i_sel_comm: usize, i_sel_cons: usize, settings: &Settings, æh: &Ælhometta) -> Result<(), String> {
     // Sanity checks
     if (comm_count.len() == 0) || (cons_count.len() == 0) {
         return Err(String::from("Count is empty yet"));
@@ -152,12 +154,15 @@ fn draw_frequencies(comm_count: &Vec<(Command, u128)>, cons_count: &Vec<(Constru
 
     // Selected Command
     let i_sel_comm = i_sel_comm % comm_count.len(); // sanity clamp
+    let sel_comm_bcont_chars: Vec<String> = format!("{:02X}", comm_count[i_sel_comm].0.to_u8().unwrap_or(0)).chars().map(|ch| ch.to_string()).collect();
     let sel_comm_chars: Vec<String> = format!("{:?}", comm_count[i_sel_comm].0).chars().map(|ch| ch.to_string()).collect();
     let sel_comm_count_chars: Vec<String> = format!("{}", comm_count[i_sel_comm].1).chars().map(|ch| ch.to_string()).collect();
 
     for x in 0..freq_window_width {
-        let (sym, text_color) = if (x as usize) < sel_comm_chars.len() {
-            (sel_comm_chars[x as usize].as_str(), Color::White)
+        let (sym, text_color) = if (x as usize) < 2 {
+            (sel_comm_bcont_chars[x as usize].as_str(), Color::DarkGrey)
+        } else if ((x as usize) >= 4) && ((x as usize) - 4 < sel_comm_chars.len()) {
+            (sel_comm_chars[(x as usize) - 4].as_str(), Color::White)
         } else if (x as usize) + sel_comm_count_chars.len() >= (freq_window_width as usize) {
             (sel_comm_count_chars[(x as usize) + sel_comm_count_chars.len() - (freq_window_width as usize)].as_str(), Color::DarkYellow)
         } else {
@@ -167,11 +172,22 @@ fn draw_frequencies(comm_count: &Vec<(Command, u128)>, cons_count: &Vec<(Constru
     }
 
     // Command-s
-    let bar_max_height = (freq_window_height - (settings.freqs_comm_str_len as i16) - 2 - cons_chart_height).max(0);
+    let bar_max_height = (freq_window_height - (settings.freqs_comm_str_len as i16) - 3 - cons_chart_height).max(0);
     let max_count = comm_count.iter().fold(0, |acc, x| acc.max(x.1)).max(1);
     for (i, (comm, count)) in comm_count.iter().enumerate() {
         let x = term_width - freq_window_width + (i as i16);
         if x >= 0 {
+            if let Some(cind) = comm.to_u8() {
+                let allowed = æh.commandswitch(cind);
+                let fc = if i == i_sel_comm {
+                    Color::White
+                } else {
+                    [Color::DarkRed, Color::DarkGreen][allowed as usize]
+                };
+                let sym = ["×", "•"][allowed as usize];
+                print_symbol(sym, x, 1, fc, Color::Reset);
+            }
+
             let comm_chars = format!("{:?}", *comm).chars().map(|ch| ch.to_string()).collect::<Vec<String>>();
             let l = comm_chars.len();
             let color_bright = if i == i_sel_comm {
@@ -200,7 +216,7 @@ fn draw_frequencies(comm_count: &Vec<(Command, u128)>, cons_count: &Vec<(Constru
                         "⁞"
                     }
                 };
-                print_symbol(sym, x, 1 + (y as i16), [color_bright, Color::Black][i & 1], [color_dark_back, color_bright][i & 1]);
+                print_symbol(sym, x, 2 + (y as i16), [color_bright, Color::Black][i & 1], [color_dark_back, color_bright][i & 1]);
             }
             let h = ((*count) * ((bar_max_height as u128) << 1) / max_count) as i16;
             let color_bar = if i == i_sel_comm {
@@ -216,7 +232,7 @@ fn draw_frequencies(comm_count: &Vec<(Command, u128)>, cons_count: &Vec<(Constru
                 } else {
                     " "
                 };
-                print_symbol(sym, x, 1 + (settings.freqs_comm_str_len as i16) + y, color_bar, Color::Reset);
+                print_symbol(sym, x, 2 + (settings.freqs_comm_str_len as i16) + y, color_bar, Color::Reset);
             }
             // Frame horizontal line
             print_symbol("─", x, freq_window_height, Color::DarkGrey, Color::Reset);
@@ -240,7 +256,7 @@ fn draw_frequencies(comm_count: &Vec<(Command, u128)>, cons_count: &Vec<(Constru
         } else {
             Color::DarkMagenta
         };
-        print_symbol(sym, term_width - freq_window_width + x, 1 + (settings.freqs_comm_str_len as i16) + bar_max_height, Color::Yellow, bc);
+        print_symbol(sym, term_width - freq_window_width + x, 2 + (settings.freqs_comm_str_len as i16) + bar_max_height, Color::Yellow, bc);
     }
 
     // Construction-s
@@ -449,7 +465,7 @@ impl Commander {
                         last_branches_alt_count = branches_alt_count;
                         branches_alt_sum_count = branches_alt_counts.iter().sum();
 
-                        draw_frequencies(&comm_sum_count, &cons_sum_count, branches_main_sum_count, branches_alt_sum_count, self.selections.i_command, self.selections.i_construction, & self.settings).unwrap_or(());
+                        draw_frequencies(&comm_sum_count, &cons_sum_count, branches_main_sum_count, branches_alt_sum_count, self.selections.i_command, self.selections.i_construction, & self.settings, æh).unwrap_or(());
                     }
 
                     io::stdout().flush().unwrap_or(());
@@ -468,22 +484,22 @@ impl Commander {
                         match key_code {
                             KeyCode::Left => {
                                 self.selections.i_command = (self.selections.i_command + last_comm_totals.len() - step) % last_comm_totals.len();
-                                draw_frequencies(&comm_sum_count, &cons_sum_count, branches_main_sum_count, branches_alt_sum_count, self.selections.i_command, self.selections.i_construction, & self.settings).unwrap_or(());
+                                draw_frequencies(&comm_sum_count, &cons_sum_count, branches_main_sum_count, branches_alt_sum_count, self.selections.i_command, self.selections.i_construction, & self.settings, æh).unwrap_or(());
                                 io::stdout().flush().unwrap_or(());
                             },
                             KeyCode::Right => {
                                 self.selections.i_command = (self.selections.i_command + step) % last_comm_totals.len();
-                                draw_frequencies(&comm_sum_count, &cons_sum_count, branches_main_sum_count, branches_alt_sum_count, self.selections.i_command, self.selections.i_construction, & self.settings).unwrap_or(());
+                                draw_frequencies(&comm_sum_count, &cons_sum_count, branches_main_sum_count, branches_alt_sum_count, self.selections.i_command, self.selections.i_construction, & self.settings, æh).unwrap_or(());
                                 io::stdout().flush().unwrap_or(());
                             },
                             KeyCode::Up => {
                                 self.selections.i_construction = (self.selections.i_construction + last_cons_totals.len() - 1) % last_cons_totals.len();
-                                draw_frequencies(&comm_sum_count, &cons_sum_count, branches_main_sum_count, branches_alt_sum_count, self.selections.i_command, self.selections.i_construction, & self.settings).unwrap_or(());
+                                draw_frequencies(&comm_sum_count, &cons_sum_count, branches_main_sum_count, branches_alt_sum_count, self.selections.i_command, self.selections.i_construction, & self.settings, æh).unwrap_or(());
                                 io::stdout().flush().unwrap_or(());
                             },
                             KeyCode::Down => {
                                 self.selections.i_construction = (self.selections.i_construction + 1) % last_cons_totals.len();
-                                draw_frequencies(&comm_sum_count, &cons_sum_count, branches_main_sum_count, branches_alt_sum_count, self.selections.i_command, self.selections.i_construction, & self.settings).unwrap_or(());
+                                draw_frequencies(&comm_sum_count, &cons_sum_count, branches_main_sum_count, branches_alt_sum_count, self.selections.i_command, self.selections.i_construction, & self.settings, æh).unwrap_or(());
                                 io::stdout().flush().unwrap_or(());
                             },
                             _ => {
