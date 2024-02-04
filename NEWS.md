@@ -7,7 +7,7 @@ Version 1.0.4 (2024.02.04)
 
 * Added counts of successfully authenticated (`permitted`) and all (`attempted`) incoming connections from other peers *in the past*, beside the count of *current* (`absorbing`) ones.
 
-* `@ shownode` and `@ statistics` print raw byte representation of `Content` in addition to its name; execution statistics chart includes such representation of selected `Command`.
+* `@ shownode` and `@ statistics cont` print raw byte representation of `Content` in addition to its name; execution statistics chart includes such representation of selected `Command`.
 
 * Configuration and state of "this" peer are now displayed by just `@ peer` instead of `@ peer info`.
 
